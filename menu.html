@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap (easy + free) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <title>Cheat Day • Menu</title>
+
+  <style>
+    .hero {
+      background: linear-gradient(135deg, #111827, #1f2937);
+      color: white;
+      border-radius: 1rem;
+    }
+    .card-img-top {
+      height: 180px;
+      object-fit: cover;
+    }
+    .pill-scroll {
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pill-scroll .btn { white-space: nowrap; }
+    .price {
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .muted-small { font-size: 0.9rem; color: #6b7280; }
+  </style>
+</head>
+
+<body class="bg-light">
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">Cheat Day</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div id="nav" class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item"><a class="nav-link active" href="#">Menu</a></li>
+          <!-- swap these hrefs later -->
+          <li class="nav-item"><a class="nav-link" href="cart.html">Cart</a></li>
+          <li class="nav-item">
+            <a class="btn btn-dark btn-sm" href="cart.html">
+              Cart <span id="cartCount" class="badge text-bg-light ms-1">0</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <main class="container py-4">
+    <div class="hero p-4 p-md-5 mb-4 shadow-sm">
+      <div class="row g-3 align-items-center">
+        <div class="col-lg-7">
+          <h1 class="display-6 fw-bold mb-2">Order Catering in Minutes</h1>
+          <p class="mb-0 opacity-75">
+            Browse the menu, add items to your cart, and check out. Staff will update your order status after submission.
+          </p>
+        </div>
+        <div class="col-lg-5">
+          <div class="input-group">
+            <span class="input-group-text">Search</span>
+            <input id="searchInput" class="form-control" placeholder="e.g., brisket, salad, cookies" />
+            <button id="clearSearch" class="btn btn-outline-light" type="button">Clear</button>
+          </div>
+          <div class="muted-small mt-2">
+            Tip: filter by category, then search to narrow fast.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between mb-3">
+      <div class="pill-scroll d-flex gap-2 pb-1" id="categoryPills">
+        <!-- pills injected -->
+      </div>
+
+      <div class="d-flex gap-2">
+        <select id="sortSelect" class="form-select form-select-sm" style="max-width: 220px;">
+          <option value="featured">Sort: Featured</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+          <option value="name-asc">Name: A → Z</option>
+        </select>
+        <button id="viewCart" class="btn btn-dark btn-sm">View Cart</button>
+      </div>
+    </div>
+
+    <!-- MENU GRID -->
+    <div id="menuGrid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <!-- cards injected -->
+    </div>
+
+    <div id="emptyState" class="alert alert-secondary mt-4 d-none">
+      No items match your filters. Try a different category or clear search.
+    </div>
+
+    <footer class="text-center text-secondary small py-4">
+      Demo menu page • Connect to backend later via <code>API_BASE_URL</code>
+    </footer>
+  </main>
+
+  <!-- TOAST CONTAINER -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;">
+    <div id="toast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div id="toastMsg" class="toast-body">Added to cart!</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    /***********************
+     * CONFIG (backend-ready)
+     ***********************/
+    const CONFIG = {
+      USE_MOCKS: true,
+      API_BASE_URL: "http://localhost:3000"
+    };
+
+    /***********************
+     * MOCK MENU (replace later)
+     ***********************/
+    const MOCK_MENU = [
+      { id: "m1", name: "Chicken Alfredo Tray", category: "Trays", price: 54.99,
+        desc: "Creamy alfredo pasta tray. Serves 6–8.",
+        img: "https://picsum.photos/seed/alfredo/800/600" },
+
+      { id: "m2", name: "BBQ Brisket Sandwich Box", category: "Boxes", price: 79.99,
+        desc: "10 sandwiches + chips + pickles.",
+        img: "https://picsum.photos/seed/brisket/800/600" },
+
+      { id: "m3", name: "Caesar Salad Bowl", category: "Sides", price: 24.50,
+        desc: "Romaine, parmesan, croutons, house dressing.",
+        img: "https://picsum.photos/seed/caesar/800/600" },
+
+      { id: "m4", name: "Mac & Cheese Pan", category: "Sides", price: 29.99,
+        desc: "Creamy baked mac. Serves 6–8.",
+        img: "https://picsum.photos/seed/mac/800/600" },
+
+      { id: "m5", name: "Assorted Cookies (Dozen)", category: "Dessert", price: 12.99,
+        desc: "Chocolate chip + sugar + oatmeal raisin.",
+        img: "https://picsum.photos/seed/cookies/800/600" },
+
+      { id: "m6", name: "Lemonade Gallon", category: "Drinks", price: 9.99,
+        desc: "Fresh-squeezed style. Serves ~12 cups.",
+        img: "https://picsum.photos/seed/lemonade/800/600" }
+    ];
+
+    /***********************
+     * API LAYER (swap later)
+     ***********************/
+    async function listMenuItems() {
+      if (CONFIG.USE_MOCKS) return MOCK_MENU;
+
+      const res = await fetch(`${CONFIG.API_BASE_URL}/api/menu`);
+      if (!res.ok) throw new Error("Failed to load menu");
+      return res.json();
+    }
+
+    /***********************
+     * CART (localStorage demo)
+     ***********************/
+    const CART_KEY = "cheatday_cart";
+
+    function getCart() {
+      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    }
+    function setCart(cart) {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      updateCartCount();
+    }
+    function addToCart(item, qty = 1) {
+      const cart = getCart();
+      const i = cart.findIndex(x => x.id === item.id);
+      if (i >= 0) cart[i].qty += qty;
+      else cart.push({ id: item.id, name: item.name, price: item.price, qty });
+      setCart(cart);
+    }
+    function cartCount() {
+      return getCart().reduce((sum, line) => sum + (line.qty || 0), 0);
+    }
+
+    /***********************
+     * UI HELPERS
+     ***********************/
+    function money(n) {
+      return Number(n || 0).toLocaleString(undefined, { style: "currency", currency: "USD" });
+    }
+
+    function showToast(msg) {
+      document.getElementById("toastMsg").textContent = msg;
+      const toastEl = document.getElementById("toast");
+      const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 1200 });
+      toast.show();
+    }
+
+    function updateCartCount() {
+      document.getElementById("cartCount").textContent = cartCount();
+    }
+
+    /***********************
+     * RENDERING + FILTERS
+     ***********************/
+    let ALL_ITEMS = [];
+    let activeCategory = "All";
+
+    function buildCategories(items) {
+      const cats = ["All", ...Array.from(new Set(items.map(i => i.category))).sort()];
+      const wrap = document.getElementById("categoryPills");
+      wrap.innerHTML = cats.map(c => `
+        <button class="btn btn-sm ${c === "All" ? "btn-dark" : "btn-outline-dark"} me-1"
+                data-cat="${c}">
+          ${c}
+        </button>
+      `).join("");
+
+      wrap.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-cat]");
+        if (!btn) return;
+        activeCategory = btn.dataset.cat;
+        // update active styles
+        [...wrap.querySelectorAll("button")].forEach(b => {
+          b.classList.toggle("btn-dark", b.dataset.cat === activeCategory);
+          b.classList.toggle("btn-outline-dark", b.dataset.cat !== activeCategory);
+        });
+        renderMenu();
+      });
+    }
+
+    function getFilteredItems() {
+      const q = document.getElementById("searchInput").value.trim().toLowerCase();
+      const sort = document.getElementById("sortSelect").value;
+
+      let items = ALL_ITEMS.slice();
+
+      if (activeCategory !== "All") {
+        items = items.filter(i => i.category === activeCategory);
+      }
+
+      if (q) {
+        items = items.filter(i =>
+          i.name.toLowerCase().includes(q) ||
+          i.desc.toLowerCase().includes(q) ||
+          i.category.toLowerCase().includes(q)
+        );
+      }
+
+      if (sort === "price-asc") items.sort((a, b) => a.price - b.price);
+      if (sort === "price-desc") items.sort((a, b) => b.price - a.price);
+      if (sort === "name-asc") items.sort((a, b) => a.name.localeCompare(b.name));
+
+      return items;
+    }
+
+    function cardHTML(item) {
+      return `
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <img src="${item.img}" class="card-img-top" alt="${item.name}">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <h5 class="card-title mb-1">${item.name}</h5>
+                <span class="badge text-bg-secondary">${item.category}</span>
+              </div>
+              <p class="card-text text-secondary mb-3">${item.desc}</p>
+
+              <div class="mt-auto d-flex align-items-center justify-content-between">
+                <div class="price">${money(item.price)}</div>
+
+                <div class="d-flex align-items-center gap-2">
+                  <select class="form-select form-select-sm w-auto js-qty" data-id="${item.id}">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                  <button class="btn btn-sm btn-dark js-add" data-id="${item.id}">Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMenu() {
+      const grid = document.getElementById("menuGrid");
+      const empty = document.getElementById("emptyState");
+
+      const items = getFilteredItems();
+      grid.innerHTML = items.map(cardHTML).join("");
+
+      empty.classList.toggle("d-none", items.length !== 0);
+    }
+
+    /***********************
+     * INIT
+     ***********************/
+    async function init() {
+      updateCartCount();
+
+      ALL_ITEMS = await listMenuItems();
+      buildCategories(ALL_ITEMS);
+      renderMenu();
+
+      document.getElementById("searchInput").addEventListener("input", renderMenu);
+      document.getElementById("sortSelect").addEventListener("change", renderMenu);
+
+      document.getElementById("clearSearch").addEventListener("click", () => {
+        document.getElementById("searchInput").value = "";
+        renderMenu();
+      });
+
+      document.getElementById("viewCart").addEventListener("click", () => {
+        window.location.href = "cart.html"; // adjust later
+      });
+
+      document.getElementById("menuGrid").addEventListener("click", (e) => {
+        const btn = e.target.closest(".js-add");
+        if (!btn) return;
+
+        const id = btn.dataset.id;
+        const item = ALL_ITEMS.find(x => x.id === id);
+        if (!item) return;
+
+        const qtySel = btn.parentElement.querySelector(".js-qty");
+        const qty = qtySel ? Number(qtySel.value) : 1;
+
+        addToCart(item, qty);
+        showToast(`Added ${qty} × ${item.name} to cart`);
+      });
+    }
+
+    init().catch(err => {
+      console.error(err);
+      alert("Menu failed to load. Check console.");
+    });
+  </script>
+</body>
+</html>
