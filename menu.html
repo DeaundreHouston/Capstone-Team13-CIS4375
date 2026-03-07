@@ -11,7 +11,7 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background-color: #FFFACD;
+            background-color: #B39DDB;
         }
 
         /* Top Header and Logo */
@@ -102,7 +102,7 @@
 
 /* Individual Tile Styling */
 .item-tile {
-    background-color: #fff;
+    background-color: #FFFACD;
     border: 1px solid #ddd;
     border-radius: 12px;
     padding: 20px;
@@ -143,12 +143,34 @@
     border-radius: 8px 8px 0 0; /* Rounds only the top corners to match the tile */
     margin-bottom: 15px;
 }
+
+/* This class will only affect the images we choose */
+.item-tile img.drink-thumb {
+    object-fit: contain;
+    background-color: transparent; /* Adds a soft white backing if the photo is narrow */
+    padding: 10px;
+}
+
+.logo-img {
+    height: 80px; /* Adjust this number to make the logo larger or smaller */
+    width: auto;  /* Keeps the logo's proportions correct */
+    display: block;
+}
+
+/* Remove or update the old .logo text styles to prevent interference */
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="logo">Cheat Day</a>
+        <a href="index.html" class="logo">
+        <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
+    </a>
         <nav>
             <a href="index.html">Home</a>
             <a href="menu.html">Menu</a>
@@ -204,19 +226,19 @@
         <div class="item-tile">
             <img src="images/collard-greens.jpg" alt="Collard Greens">
             <h3>Collard Greens</h3>
-            <p>A generous portion of our signature collard greens, slow-cooked with our special blend of seasonings.</p>
+            <p>Signature collard greens, slow-cooked with our special blend of seasonings.</p>
             <span class="price">$12.50</span>
         </div>
 
         <div class="item-tile">
-            <img src="images/strawberry-lemonade.jpg" alt="Strawberry Lemonade">
+            <img src="images/strawberry-lemonade.jpg" alt="Strawberry Lemonade" class="drink-thumb">
             <h3>Strawberry Lemonade</h3>
             <p>A refreshing blend of fresh strawberries and lemonade, served over ice.</p>
             <span class="price">$7.50</span>
           </div>
 
         <div class="item-tile">
-            <img src="images/peach-lemonade.jpeg" alt="Peach Lemonade">
+            <img src="images/peach-lemonade.jpeg" alt="Peach Lemonade" class="drink-thumb">
             <h3>Peach Lemonade</h3>
             <p>A refreshing blend of fresh peaches and lemonade, served over ice.</p>
             <span class="price">$7.50</span>
