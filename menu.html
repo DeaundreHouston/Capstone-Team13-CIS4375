@@ -133,6 +133,15 @@
     color: #B39DDB;
     font-size: 1.2rem;
 }
+
+/* Styling for the images inside each menu tile */
+.item-tile img {
+    width: 100%;
+    height: 200px; /* Fixed height for consistency */
+    object-fit: cover; /* Crops the image to fit the box without stretching */
+    border-radius: 8px 8px 0 0; /* Rounds only the top corners to match the tile */
+    margin-bottom: 15px;
+}
     </style>
 </head>
 <body>
@@ -150,6 +159,7 @@
 <main>
     <div class="menu-grid">
         <div class="item-tile">
+            <img src="images/chicken-wing-platter.jpg" alt="Fried Chicken Wing Platter">
             <h3>Fried Chicken Wing Platter</h3>
             <p>Our signature crispy wings, seasoned with family-secret spices and served with your choice of sides.</p>
             <span class="price">$30.99</span>
