@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cart | Cheat Day Catering</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .cart-wrap{ max-width:1200px; margin:0 auto; padding:20px; text-align:left; }
+    .cart-grid{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:24px; align-items:start; }
+    @media (max-width:900px){ .cart-grid{ grid-template-columns:1fr; } }
+
+    .panel{
+      background:#FFFACD; border:1px solid #ddd; border-radius:12px;
+      padding:18px; box-shadow:0 4px 8px rgba(0,0,0,0.08);
+    }
+    .panel h2{ margin:0 0 12px; color:#333; }
+
+    .table{
+      width:100%; border-collapse:collapse; border-radius:10px;
+      background:#fff; border:1px solid #eee; overflow:hidden;
+    }
+    .table th,.table td{ padding:10px; border-bottom:1px solid #eee; vertical-align:middle; font-size:14px; }
+    .table th{ background:rgba(179,157,219,0.18); font-weight:700; color:#333; text-align:left; }
+    .right{ text-align:right; } .center{ text-align:center; }
+
+    .qty-controls{ display:inline-flex; align-items:center; gap:8px; justify-content:center; }
+    .qty-btn{
+      width:28px; height:28px; border-radius:8px; border:1px solid #ddd;
+      background:#fff; cursor:pointer; font-weight:700; color:#333;
+    }
+    .qty-btn:hover{ border-color:#B39DDB; }
+
+    .remove-btn{
+      border:none; background:transparent; color:#9575CD; font-weight:700;
+      cursor:pointer; text-decoration:underline; font-size:13px; padding:0;
+    }
+
+    .totals{ margin-top:14px; background:#fff; border:1px solid #eee; border-radius:10px; padding:12px; }
+    .totals-row{ display:flex; justify-content:space-between; padding:6px 0; font-size:14px; color:#333; }
+    .totals-row strong{ font-size:15px; }
+
+    .muted{ color:#666; font-size:13px; margin-top:8px; }
+
+    .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .form-grid .full{ grid-column:1 / -1; }
+    .field label{ display:block; font-size:13px; font-weight:700; color:#333; margin-bottom:6px; }
+    .field input,.field select{
+      width:100%; padding:10px; border-radius:10px; border:1px solid #ddd;
+      outline:none; font-size:14px; background:#fff;
+    }
+    .field input:focus,.field select:focus{
+      border-color:#B39DDB; box-shadow:0 0 0 3px rgba(179,157,219,0.25);
+    }
+
+    .pay-methods{ display:grid; gap:10px; margin-top:10px; }
+    .pay-option{ background:#fff; border:1px solid #eee; border-radius:12px; padding:10px 12px; }
+    .pay-option label{
+      display:flex; align-items:center; gap:10px; cursor:pointer;
+      font-weight:700; color:#333; font-size:14px;
+    }
+    .pay-details{ margin-top:10px; display:none; }
+    .pay-details.active{ display:block; }
+
+    .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .btn{
+      padding:12px 14px; border:none; border-radius:12px; font-weight:800;
+      cursor:pointer; text-shadow:0px 0px 2px rgba(255,255,255,0.35);
+      transition:background 0.2s ease, transform 0.15s ease;
+    }
+    .btn-primary{
+      background:#333; color:#fff; flex:1; min-width:220px;
+    }
+    .btn-primary:hover{ background:#9575CD; transform:translateY(-1px); }
+    .btn-secondary{
+      background:#fff; color:#333; border:1px solid #ddd; flex:1; min-width:180px;
+    }
+    .btn-secondary:hover{ border-color:#B39DDB; transform:translateY(-1px); }
+    .btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
+
+    .empty-state{ text-align:center; padding:30px 10px; color:#333; }
+    .linkish{ color:#9575CD; font-weight:700; text-decoration:underline; cursor:pointer; }
+
+    .toast{
+      position:fixed; right:16px; bottom:16px; background:#333; color:#fff;
+      padding:10px 14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.25);
+      opacity:0; transform:translateY(10px); transition:opacity 0.2s ease, transform 0.2s ease;
+      pointer-events:none; font-size:0.95rem; z-index:9999;
+      border:1px solid rgba(179,157,219,0.7);
+    }
+    .toast.show{ opacity:1; transform:translateY(0); }
+  </style>
+</head>
+
+<body>
+  <header>
+    <a href="index.html" class="logo">
+      <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="menu.html">Menu</a>
+      <a href="cart.html" class="cart-link">
+        Cart <span id="cartCount" class="cart-badge">0</span>
+      </a>
+    </nav>
+  </header>
+
+  <h1>Your Cart</h1>
+
+  <main>
+    <div class="cart-wrap">
+      <div class="cart-grid">
+
+        <!-- LEFT: CART -->
+        <section class="panel" aria-label="Cart items">
+          <h2>Items</h2>
+
+          <div id="emptyState" class="empty-state" style="display:none;">
+            Your cart is empty.<br>
+            <a class="linkish" href="menu.html">Go back to the menu</a>
+          </div>
+
+          <div id="cartSection">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="right">Price</th>
+                  <th class="center">Qty</th>
+                  <th class="right">Line Total</th>
+                  <th class="right">Remove</th>
+                </tr>
+              </thead>
+              <tbody id="cartBody"></tbody>
+            </table>
+
+            <div class="totals">
+              <div class="totals-row"><span>Subtotal</span><span id="subtotal">$0.00</span></div>
+              <div class="totals-row"><span>Tax</span><span id="tax">$0.00</span></div>
+              <div class="totals-row"><strong>Total</strong><strong id="total">$0.00</strong></div>
+              <div class="muted">Adjust quantities here. Billing + payment are on the right.</div>
+            </div>
+
+            <div class="btn-row">
+              <button id="continueBtn" class="btn btn-primary" type="button">Continue to Checkout</button>
+              <button id="clearBtn" class="btn btn-secondary" type="button">Clear Cart</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- RIGHT: BILLING + PAYMENT -->
+        <section class="panel" aria-label="Billing and payment">
+          <h2>Billing Information</h2>
+
+          <form id="rightForm">
+            <div class="form-grid">
+              <div class="field full">
+                <label for="fullName">Full Name</label>
+                <input id="fullName" name="fullName" required placeholder="First Last" />
+              </div>
+
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required placeholder="you@email.com" />
+              </div>
+
+              <div class="field">
+                <label for="phone">Phone</label>
+                <input id="phone" name="phone" required placeholder="(###) ###-####" />
+              </div>
+
+              <div class="field full">
+                <label for="address1">Billing Address</label>
+                <input id="address1" name="address1" required placeholder="Street address" />
+              </div>
+
+              <div class="field full">
+                <label for="address2">Apt / Suite (optional)</label>
+                <input id="address2" name="address2" placeholder="Apt, suite, unit, building" />
+              </div>
+
+              <div class="field">
+                <label for="city">City</label>
+                <input id="city" name="city" required placeholder="Fort Worth" />
+              </div>
+
+              <div class="field">
+                <label for="state">State</label>
+                <input id="state" name="state" required placeholder="TX" />
+              </div>
+
+              <div class="field">
+                <label for="zip">ZIP</label>
+                <input id="zip" name="zip" required placeholder="761xx" />
+              </div>
+
+              <div class="field">
+                <label for="country">Country</label>
+                <select id="country" name="country">
+                  <option value="US" selected>United States</option>
+                </select>
+              </div>
+            </div>
+
+            <h2 style="margin-top:16px;">Payment Method</h2>
+
+            <div class="pay-methods">
+              <div class="pay-option">
+                <label>
+                  <input type="radio" name="paymentMethod" value="card" checked />
+                  Credit / Debit Card
+                </label>
+                <div class="pay-details active" data-method="card">
+                  <div class="form-grid">
+                    <div class="field full">
+                      <label for="cardName">Name on Card</label>
+                      <input id="cardName" name="cardName" placeholder="Name as shown on card" />
+                    </div>
+                    <div class="field full">
+                      <label for="cardNumber">Card Number</label>
+                      <input id="cardNumber" name="cardNumber" inputmode="numeric" placeholder="1234 5678 9012 3456" />
+                    </div>
+                    <div class="field">
+                      <label for="exp">Expiration</label>
+                      <input id="exp" name="exp" placeholder="MM/YY" />
+                    </div>
+                    <div class="field">
+                      <label for="cvv">CVV</label>
+                      <input id="cvv" name="cvv" inputmode="numeric" placeholder="123" />
+                    </div>
+                  </div>
+                  <div class="muted">Demo only. Don’t store real card info in localStorage in a real app.</div>
+                </div>
+              </div>
+
+              <div class="pay-option">
+                <label>
+                  <input type="radio" name="paymentMethod" value="cashapp" />
+                  Cash App
+                </label>
+                <div class="pay-details" data-method="cashapp">
+                  <div class="field">
+                    <label for="cashTag">Cash App $Cashtag</label>
+                    <input id="cashTag" name="cashTag" placeholder="$YourCashtag" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="pay-option">
+                <label>
+                  <input type="radio" name="paymentMethod" value="paypal" />
+                  PayPal
+                </label>
+                <div class="pay-details" data-method="paypal">
+                  <div class="field">
+                    <label for="paypalEmail">PayPal Email</label>
+                    <input id="paypalEmail" name="paypalEmail" type="email" placeholder="paypal@email.com" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="pay-option">
+                <label>
+                  <input type="radio" name="paymentMethod" value="applepay" />
+                  Apple Pay
+                </label>
+                <div class="pay-details" data-method="applepay">
+                  <div class="muted">Demo: Apple Pay requires a payment provider (Stripe/Square) + supported device.</div>
+                </div>
+              </div>
+
+              <div class="pay-option">
+                <label>
+                  <input type="radio" name="paymentMethod" value="googlepay" />
+                  Google Pay
+                </label>
+                <div class="pay-details" data-method="googlepay">
+                  <div class="muted">Demo: Google Pay requires a payment provider + supported browser/device.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="muted">
+              Billing/payment choices are saved locally for now so checkout can reuse them.
+            </div>
+          </form>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>Contact Us</h3>
+        <p>Phone: (210) 722-0119</p>
+      </div>
+
+      <div class="footer-column">
+        <h3>Follow Us</h3>
+        <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast">Saved!</div>
+
+  <script>
+    const CART_KEY = "cheatday_cart";
+    const BILLING_KEY = "cheatday_billing";
+    const PAYMENT_KEY = "cheatday_payment";
+    const TAX_RATE = 0.0825;
+
+    function getCart(){ return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
+    function setCart(cart){
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      updateCartCount();
+    }
+    function cartCount(){ return getCart().reduce((sum, line) => sum + (line.qty || 0), 0); }
+    function updateCartCount(){
+      const el = document.getElementById("cartCount");
+      if (el) el.textContent = cartCount();
+    }
+    function money(n){ return Number(n||0).toLocaleString(undefined,{style:"currency",currency:"USD"}); }
+    function calcTotals(cart){
+      const subtotal = cart.reduce((s,x)=>s+(Number(x.price)*Number(x.qty)),0);
+      const tax = subtotal * TAX_RATE;
+      return { subtotal, tax, total: subtotal + tax };
+    }
+    function escapeHTML(str){
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[s]));
+    }
+
+    let toastTimer=null;
+    function showToast(msg){
+      const t=document.getElementById("toast");
+      t.textContent=msg;
+      t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer=setTimeout(()=>t.classList.remove("show"),1400);
+    }
+
+    function renderCart(){
+      const cart = getCart();
+      const emptyState = document.getElementById("emptyState");
+      const cartSection = document.getElementById("cartSection");
+      const continueBtn = document.getElementById("continueBtn");
+
+      if (!cart.length){
+        emptyState.style.display="block";
+        cartSection.style.display="none";
+        continueBtn.disabled = true;
+        return;
+      }
+
+      emptyState.style.display="none";
+      cartSection.style.display="block";
+      continueBtn.disabled = false;
+
+      document.getElementById("cartBody").innerHTML = cart.map(item => {
+        const lineTotal = Number(item.price) * Number(item.qty);
+        return `
+          <tr>
+            <td>${escapeHTML(item.name)}</td>
+            <td class="right">${money(item.price)}</td>
+            <td class="center">
+              <div class="qty-controls">
+                <button class="qty-btn js-dec" data-id="${escapeHTML(item.id)}" type="button">-</button>
+                <strong>${item.qty}</strong>
+                <button class="qty-btn js-inc" data-id="${escapeHTML(item.id)}" type="button">+</button>
+              </div>
+            </td>
+            <td class="right">${money(lineTotal)}</td>
+            <td class="right">
+              <button class="remove-btn js-remove" data-id="${escapeHTML(item.id)}" type="button">Remove</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      const totals = calcTotals(cart);
+      document.getElementById("subtotal").textContent = money(totals.subtotal);
+      document.getElementById("tax").textContent = money(totals.tax);
+      document.getElementById("total").textContent = money(totals.total);
+    }
+
+    function incItem(id){
+      const cart = getCart();
+      const line = cart.find(x => x.id === id);
+      if (!line) return;
+      line.qty += 1;
+      setCart(cart);
+      renderCart();
+      showToast("Quantity updated");
+    }
+    function decItem(id){
+      const cart = getCart();
+      const line = cart.find(x => x.id === id);
+      if (!line) return;
+      line.qty = Math.max(1, line.qty - 1);
+      setCart(cart);
+      renderCart();
+      showToast("Quantity updated");
+    }
+    function removeItem(id){
+      const cart = getCart().filter(x => x.id !== id);
+      setCart(cart);
+      renderCart();
+      showToast("Removed item");
+    }
+    function clearCart(){
+      setCart([]);
+      renderCart();
+      showToast("Cart cleared");
+    }
+
+    function loadJSON(key){
+      try { return JSON.parse(localStorage.getItem(key) || "null"); }
+      catch { return null; }
+    }
+    function saveJSON(key, val){
+      localStorage.setItem(key, JSON.stringify(val));
+    }
+
+    function readBillingPaymentForm(){
+      const form = document.getElementById("rightForm");
+      const fd = new FormData(form);
+      return {
+        billing: {
+          fullName: (fd.get("fullName") || "").trim(),
+          email: (fd.get("email") || "").trim(),
+          phone: (fd.get("phone") || "").trim(),
+          address1: (fd.get("address1") || "").trim(),
+          address2: (fd.get("address2") || "").trim(),
+          city: (fd.get("city") || "").trim(),
+          state: (fd.get("state") || "").trim(),
+          zip: (fd.get("zip") || "").trim(),
+          country: (fd.get("country") || "US").trim()
+        },
+        payment: {
+          method: fd.get("paymentMethod"),
+          cashTag: (fd.get("cashTag") || "").trim(),
+          paypalEmail: (fd.get("paypalEmail") || "").trim(),
+          // demo only – do NOT store real card info in production
+          cardName: (fd.get("cardName") || "").trim(),
+          cardNumber: (fd.get("cardNumber") || "").trim(),
+          exp: (fd.get("exp") || "").trim(),
+          cvv: (fd.get("cvv") || "").trim()
+        }
+      };
+    }
+
+    function fillForm(data){
+      if (!data) return;
+      const b = data.billing || {};
+      const p = data.payment || {};
+      const setVal = (name, val) => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el != null && val != null) el.value = val;
+      };
+
+      setVal("fullName", b.fullName);
+      setVal("email", b.email);
+      setVal("phone", b.phone);
+      setVal("address1", b.address1);
+      setVal("address2", b.address2);
+      setVal("city", b.city);
+      setVal("state", b.state);
+      setVal("zip", b.zip);
+      setVal("country", b.country || "US");
+
+      // payment method
+      const method = p.method || "card";
+      const radio = document.querySelector(`input[name="paymentMethod"][value="${method}"]`);
+      if (radio) radio.checked = true;
+      setPaymentDetails(method);
+
+      setVal("cashTag", p.cashTag);
+      setVal("paypalEmail", p.paypalEmail);
+      setVal("cardName", p.cardName);
+      setVal("cardNumber", p.cardNumber);
+      setVal("exp", p.exp);
+      setVal("cvv", p.cvv);
+    }
+
+    function setPaymentDetails(method){
+      document.querySelectorAll(".pay-details").forEach(el=>{
+        el.classList.toggle("active", el.dataset.method === method);
+      });
+    }
+
+    // INIT
+    updateCartCount();
+    renderCart();
+
+    // Restore billing/payment
+    const saved = loadJSON(PAYMENT_KEY);
+    fillForm(saved);
+
+    // Cart interactions
+    document.getElementById("cartBody").addEventListener("click", (e) => {
+      const inc = e.target.closest(".js-inc");
+      const dec = e.target.closest(".js-dec");
+      const rem = e.target.closest(".js-remove");
+      if (inc) incItem(inc.dataset.id);
+      if (dec) decItem(dec.dataset.id);
+      if (rem) removeItem(rem.dataset.id);
+    });
+    document.getElementById("clearBtn").addEventListener("click", clearCart);
+
+    // Payment method toggle
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(r=>{
+      r.addEventListener("change", ()=>setPaymentDetails(r.value));
+    });
+
+    // Save billing/payment as user types
+    document.getElementById("rightForm").addEventListener("input", () => {
+      const data = readBillingPaymentForm();
+      saveJSON(BILLING_KEY, data.billing);
+      saveJSON(PAYMENT_KEY, data);
+    });
+
+    // Continue to checkout
+    document.getElementById("continueBtn").addEventListener("click", () => {
+      const cart = getCart();
+      if (!cart.length) { showToast("Cart is empty"); return; }
+
+      const form = document.getElementById("rightForm");
+      if (!form.checkValidity()){
+        form.reportValidity();
+        showToast("Please complete billing info");
+        return;
+      }
+
+      const data = readBillingPaymentForm();
+      saveJSON(BILLING_KEY, data.billing);
+      saveJSON(PAYMENT_KEY, data);
+
+      window.location.href = "checkout.html"; // your payment/submit page
+    });
+
+    // Keep badge/table in sync across tabs
+    window.addEventListener("storage", (e) => {
+      if (e.key === CART_KEY) {
+        updateCartCount();
+        renderCart();
+      }
+    });
+  </script>
+</body>
+</html>

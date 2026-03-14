@@ -1,108 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu | Cheat Day Catering</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu | Cheat Day Catering</title>
 
-    <link rel="stylesheet" href="style.css">
-
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-
-    <header>
-        <a href="index.html" class="logo">
-        <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
+  <header>
+    <a href="index.html" class="logo">
+      <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
     </a>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="menu.html">Menu</a>
-        </nav>
-    </header>
 
-    <h1>Menu</h1>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="menu.html">Menu</a>
+      <a href="cart.html" class="cart-link">
+        Cart <span id="cartCount" class="cart-badge">0</span>
+      </a>
+    </nav>
+  </header>
 
-<main>
+  <h1>Menu</h1>
+
+  <main>
     <div class="menu-grid">
-        <div class="item-tile">
-            <img src="images/fried-chicken-wing-platter.avif" alt="Fried Chicken Wing Platter">
-            <h3>Fried Chicken Wing Platter</h3>
-            <p>Crispy wings, seasoned with family-secret spices.</p>
-            <span class="price">$50.99</span>
+
+      <div class="item-tile" data-id="wings" data-name="Fried Chicken Wing Platter" data-price="50.99">
+        <img src="images/fried-chicken-wing-platter.avif" alt="Fried Chicken Wing Platter">
+        <h3>Fried Chicken Wing Platter</h3>
+        <p>Crispy wings, seasoned with family-secret spices.</p>
+        <span class="price">$50.99</span>
+
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
         </div>
+      </div>
 
-        <div class="item-tile">
-            <img src="images/fried-catfish.jpg" alt="Fried Catfish Platter">
-            <h3>Fried Catfish Platter</h3>
-            <p>Fresh-caught fillets seasoned with family-secret spices and fried to a golden perfection.</p>
-            <span class="price">$35.50</span>
+      <div class="item-tile" data-id="catfish" data-name="Fried Catfish Platter" data-price="35.50">
+        <img src="images/fried-catfish.jpg" alt="Fried Catfish Platter">
+        <h3>Fried Catfish Platter</h3>
+        <p>Fresh-caught fillets seasoned with family-secret spices and fried to a golden perfection.</p>
+        <span class="price">$35.50</span>
+
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
         </div>
+      </div>
 
-        <div class="item-tile">
-            <img src="images/fried-turkey.jpg" alt="Fried Turkey Platter">
-            <h3>Fried Turkey</h3>
-            <p>Seasoned with family-secret spices and cajun butter injection.</p>
-            <span class="price">$45.99</span>
-            </div>
+      <div class="item-tile" data-id="turkey" data-name="Fried Turkey" data-price="45.99">
+        <img src="images/fried-turkey.jpg" alt="Fried Turkey Platter">
+        <h3>Fried Turkey</h3>
+        <p>Seasoned with family-secret spices and cajun butter injection.</p>
+        <span class="price">$45.99</span>
 
-        <div class="item-tile">
-            <img src="images/french-fry-basket.webp" alt="French Fry Basket">
-            <h3>French Fry Basket</h3>
-            <p>Crispy fries seasoned with our family-secret spices.</p>
-            <span class="price">$15.50</span>
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
         </div>
+      </div>
 
-        <div class="item-tile">
-            <img src="images/cornbread.jpg" alt="Cornbread">
-            <h3>Cornbread</h3>
-            <p>Honey butter glazed cornbread baked to perfection in a cast iron skillet.</p>
-            <span class="price">$16.00</span>
+      <div class="item-tile" data-id="fries" data-name="French Fry Basket" data-price="15.50">
+        <img src="images/french-fry-basket.webp" alt="French Fry Basket">
+        <h3>French Fry Basket</h3>
+        <p>Crispy fries seasoned with our family-secret spices.</p>
+        <span class="price">$15.50</span>
+
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
         </div>
+      </div>
 
-        <div class="item-tile">
-            <img src="images/mac-and-cheese.jpg" alt="Mac and Cheese">
-            <h3>Mac & Cheese</h3>
-            <p>A generous portion of our signature mac and cheese, made with our 3 cheese house blend.</p>
-            <span class="price">$20.00</span>
+      <div class="item-tile" data-id="cornbread" data-name="Cornbread" data-price="16.00">
+        <img src="images/cornbread.jpg" alt="Cornbread">
+        <h3>Cornbread</h3>
+        <p>Honey butter glazed cornbread baked to perfection in a cast iron skillet.</p>
+        <span class="price">$16.00</span>
+
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
         </div>
+      </div>
 
-        <div class="item-tile">
-            <img src="images/collard-greens.jpg" alt="Collard Greens">
-            <h3>Collard Greens</h3>
-            <p>Collard greens with bacon bits, slow-cooked with our special blend of seasonings.</p>
-            <span class="price">$15.50</span>
+      <div class="item-tile" data-id="mac" data-name="Mac & Cheese" data-price="20.00">
+        <img src="images/mac-and-cheese.jpg" alt="Mac and Cheese">
+        <h3>Mac & Cheese</h3>
+        <p>A generous portion of our signature mac and cheese, made with our 3 cheese house blend.</p>
+        <span class="price">$20.00</span>
+
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
         </div>
+      </div>
 
-        <div class="item-tile">
-            <img src="images/strawberry-lemonade.jpg" alt="Strawberry Lemonade" class="drink-thumb">
-            <h3>Strawberry Lemonade</h3>
-            <p>A refreshing blend of fresh strawberries and lemonade.</p>
-            <span class="price">$9.50</span>
-          </div>
+      <div class="item-tile" data-id="greens" data-name="Collard Greens" data-price="15.50">
+        <img src="images/collard-greens.jpg" alt="Collard Greens">
+        <h3>Collard Greens</h3>
+        <p>Collard greens with bacon bits, slow-cooked with our special blend of seasonings.</p>
+        <span class="price">$15.50</span>
 
-        <div class="item-tile">
-            <img src="images/peach-lemonade.jpeg" alt="Peach Lemonade" class="drink-thumb">
-            <h3>Peach Lemonade</h3>
-            <p>A refreshing blend of fresh peaches and lemonade.</p>
-            <span class="price">$9.50</span>
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
         </div>
+      </div>
+
+      <div class="item-tile" data-id="strawberry-lemonade" data-name="Strawberry Lemonade" data-price="9.50">
+        <img src="images/strawberry-lemonade.jpg" alt="Strawberry Lemonade" class="drink-thumb">
+        <h3>Strawberry Lemonade</h3>
+        <p>A refreshing blend of fresh strawberries and lemonade.</p>
+        <span class="price">$9.50</span>
+
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="item-tile" data-id="peach-lemonade" data-name="Peach Lemonade" data-price="9.50">
+        <img src="images/peach-lemonade.jpeg" alt="Peach Lemonade" class="drink-thumb">
+        <h3>Peach Lemonade</h3>
+        <p>A refreshing blend of fresh peaches and lemonade.</p>
+        <span class="price">$9.50</span>
+
+        <div class="cart-controls">
+          <label>Qty</label>
+          <input class="qty-input" type="number" min="1" value="1">
+          <button class="add-btn" type="button">Add to Cart</button>
+        </div>
+      </div>
+
     </div>
-</main>
+  </main>
 
-    <footer>
-        <div class="footer-container">
-            <div class="footer-column">
-                <h3>Contact Us</h3>
-                <p>Phone: (210) 722-0119</p>
-            </div>
+  <footer>
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>Contact Us</h3>
+        <p>Phone: (210) 722-0119</p>
+      </div>
 
+      <div class="footer-column">
+        <h3>Follow Us</h3>
+        <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </footer>
 
-            <div class="footer-column">
-                <h3>Follow Us</h3>
-                <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
-            </div>
-        </div>
-    </footer>
+  <div id="toast" class="toast">Added to cart!</div>
 
+  <script>
+    // localStorage cart (demo)
+    const CART_KEY = "cheatday_cart";
+
+    function getCart() {
+      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    }
+
+    function setCart(cart) {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      updateCartCount();
+    }
+
+    function cartCount() {
+      return getCart().reduce((sum, line) => sum + (line.qty || 0), 0);
+    }
+
+    function updateCartCount() {
+      document.getElementById("cartCount").textContent = cartCount();
+    }
+
+    function addToCart(item, qty) {
+      const cart = getCart();
+      const idx = cart.findIndex(x => x.id === item.id);
+
+      if (idx >= 0) cart[idx].qty += qty;
+      else cart.push({ id: item.id, name: item.name, price: item.price, qty });
+
+      setCart(cart);
+    }
+
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1200);
+    }
+
+    // init cart badge
+    updateCartCount();
+
+    // handle all add buttons
+    document.querySelector(".menu-grid").addEventListener("click", (e) => {
+      const btn = e.target.closest(".add-btn");
+      if (!btn) return;
+
+      const tile = btn.closest(".item-tile");
+      const qtyInput = tile.querySelector(".qty-input");
+
+      const qty = Math.max(1, parseInt(qtyInput.value || "1", 10));
+      const item = {
+        id: tile.dataset.id,
+        name: tile.dataset.name,
+        price: Number(tile.dataset.price)
+      };
+
+      addToCart(item, qty);
+      showToast(`Added ${qty} × ${item.name}`);
+      qtyInput.value = "1";
+    });
+  </script>
 </body>
 </html>

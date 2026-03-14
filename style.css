@@ -161,3 +161,233 @@ footer {
     align-items: center;
     text-decoration: none;
 }
+
+/* ---------- Add-to-cart controls (match your theme) ---------- */
+
+.cart-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-badge {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 18px;
+  text-align: center;
+  background: #B39DDB;      /* your purple */
+  color: #333;
+  font-weight: bold;
+}
+
+.cart-controls {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cart-controls label {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.qty-input {
+  width: 70px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  outline: none;
+  text-align: center;
+  font-weight: bold;
+  background: #fff;
+}
+
+.qty-input:focus {
+  border-color: #B39DDB;
+  box-shadow: 0 0 0 3px rgba(179, 157, 219, 0.25);
+}
+
+.add-btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #333;          /* matches header/footer */
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.35);
+  transition: transform 0.15s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.add-btn:hover {
+  background: #9575CD;       /* hover matches your nav hover */
+  transform: translateY(-1px);
+}
+
+.add-btn:active {
+  transform: translateY(0px);
+  opacity: 0.95;
+}
+
+/* Toast popup */
+.toast {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  background: #333;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  font-size: 0.95rem;
+  z-index: 9999;
+  border: 1px solid rgba(179, 157, 219, 0.7);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Home slideshow ---------- */
+.slideshow {
+  max-width: 1100px;
+  margin: 25px auto 10px;
+  padding: 0 20px;
+}
+
+.slideshow-frame {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  background: #FFFACD;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.slide {
+  display: none;
+  position: relative;
+}
+
+.slide.active {
+  display: block;
+}
+
+.slide img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 700px) {
+  .slide img { height: 260px; }
+}
+
+.slide-caption {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  background: rgba(51, 51, 51, 0.78);
+  color: #fff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  max-width: 80%;
+  backdrop-filter: blur(2px);
+}
+
+.slide-caption h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: #B39DDB;
+}
+
+.slide-caption p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #fff;
+  opacity: 0.95;
+}
+
+/* arrows */
+.slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(51, 51, 51, 0.75);
+  color: #fff;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.slide-btn:hover {
+  background: rgba(149, 117, 205, 0.85); /* your hover purple */
+}
+
+.slide-btn:active {
+  transform: translateY(-50%) scale(0.98);
+}
+
+.slide-btn.prev { left: 12px; }
+.slide-btn.next { right: 12px; }
+
+/* dots */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 0 0;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(51, 51, 51, 0.25);
+  border: 1px solid rgba(51, 51, 51, 0.25);
+  cursor: pointer;
+}
+
+.dot.active {
+  background: #B39DDB;
+  border-color: #B39DDB;
+}
+
+/* home hero text alignment */
+.home-hero {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 20px 0;
+  text-align: center;
+}
+.home-hero h2 {
+  margin: 10px 0 6px;
+  color: #000;
+  text-shadow: 0px 0px 5px rgba(255,255,255,0.5);
+}
+.home-hero p {
+  margin: 0 0 8px;
+  color: #333;
+  font-weight: 600;
+}

@@ -1,41 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cheat Day</title>
-
-    <link rel="stylesheet" href="style.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheat Day</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  <header>
+    <a href="index.html" class="logo">
+      <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="menu.html">Menu</a>
+      <a href="cart.html" class="cart-link">
+        Cart <span id="cartCount" class="cart-badge">0</span>
+      </a>
+    </nav>
+  </header>
 
-    <header>
-        <a href="index.html" class="logo">
-        <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img"> 
-        </a>
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="menu.html">Menu</a>
-        </nav>
-    </header>
+  <main>
+    <section class="home-hero">
+      <h2>Welcome to Cheat Day</h2>
+      <p>Your destination for family-style catering in Fort Worth.</p>
+    </section>
 
-    <main>
-        <h2>Welcome to Cheat Day</h2>
-        <p>Your destination for family-style catering in Fort Worth.</p>
-    </main>
-
-    <footer>
-        <div class="footer-container">
-            <div class="footer-column">
-                <h3>Contact Us</h3>
-                <p>Phone: (210) 722-0119</p>
-            </div>
-
-
-            <div class="footer-column">
-                <h3>Follow Us</h3>
-                <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
-            </div>
+    <!-- SLIDESHOW -->
+    <section class="slideshow" aria-label="Featured food slideshow">
+      <div class="slideshow-frame" id="slideshowFrame">
+        <div class="slide active">
+          <img src="images/fried-chicken-wing-platter.avif" alt="Fried Chicken Wing Platter">
+          <div class="slide-caption">
+            <h3>Fried Chicken Wing Platter</h3>
+            <p>Crispy wings seasoned with family-secret spices.</p>
+          </div>
         </div>
-    </footer>
+
+        <div class="slide">
+          <img src="images/fried-catfish.jpg" alt="Fried Catfish Platter">
+          <div class="slide-caption">
+            <h3>Fried Catfish Platter</h3>
+            <p>Golden fried fillets with our special seasoning.</p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="images/fried-turkey.jpg" alt="Fried Turkey">
+          <div class="slide-caption">
+            <h3>Fried Turkey</h3>
+            <p>Cajun butter injection + bold family spice blend.</p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="images/mac-and-cheese.jpg" alt="Mac and Cheese">
+          <div class="slide-caption">
+            <h3>Mac &amp; Cheese</h3>
+            <p>Signature mac made with a 3-cheese house blend.</p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="images/collard-greens.jpg" alt="Collard Greens">
+          <div class="slide-caption">
+            <h3>Collard Greens</h3>
+            <p>Slow-cooked with bacon bits and special seasonings.</p>
+          </div>
+        </div>
+
+        <div class="slide">
+          <img src="images/strawberry-lemonade.jpg" alt="Strawberry Lemonade">
+          <div class="slide-caption">
+            <h3>Strawberry Lemonade</h3>
+            <p>Refreshing lemonade blended with fresh strawberries.</p>
+          </div>
+        </div>
+
+        <button class="slide-btn prev" type="button" aria-label="Previous slide" id="prevBtn">&#10094;</button>
+        <button class="slide-btn next" type="button" aria-label="Next slide" id="nextBtn">&#10095;</button>
+      </div>
+
+      <div class="dots" id="dots"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>Contact Us</h3>
+        <p>Phone: (210) 722-0119</p>
+      </div>
+
+      <div class="footer-column">
+        <h3>Follow Us</h3>
+        <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /************ Cart badge ************/
+    const CART_KEY = "cheatday_cart";
+    function getCart() { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
+    function cartCount() { return getCart().reduce((sum, line) => sum + (line.qty || 0), 0); }
+    function updateCartCount() {
+      const el = document.getElementById("cartCount");
+      if (el) el.textContent = cartCount();
+    }
+    updateCartCount();
+    window.addEventListener("storage", (e) => { if (e.key === CART_KEY) updateCartCount(); });
+
+    /************ Slideshow ************/
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const dotsWrap = document.getElementById("dots");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const frame = document.getElementById("slideshowFrame");
+
+    let idx = 0;
+    let timer = null;
+    const INTERVAL_MS = 3500;
+
+    function buildDots() {
+      dotsWrap.innerHTML = slides.map((_, i) =>
+        `<button class="dot ${i === 0 ? "active" : ""}" data-i="${i}" aria-label="Go to slide ${i+1}"></button>`
+      ).join("");
+    }
+
+    function showSlide(i) {
+      idx = (i + slides.length) % slides.length;
+      slides.forEach((s, k) => s.classList.toggle("active", k === idx));
+      const dots = Array.from(document.querySelectorAll(".dot"));
+      dots.forEach((d, k) => d.classList.toggle("active", k === idx));
+    }
+
+    function next() { showSlide(idx + 1); }
+    function prev() { showSlide(idx - 1); }
+
+    function startAuto() {
+      stopAuto();
+      timer = setInterval(next, INTERVAL_MS);
+    }
+
+    function stopAuto() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    buildDots();
+    startAuto();
+
+    nextBtn.addEventListener("click", () => { next(); startAuto(); });
+    prevBtn.addEventListener("click", () => { prev(); startAuto(); });
+
+    dotsWrap.addEventListener("click", (e) => {
+      const dot = e.target.closest(".dot");
+      if (!dot) return;
+      showSlide(Number(dot.dataset.i));
+      startAuto();
+    });
+
+    // Pause on hover (desktop)
+    frame.addEventListener("mouseenter", stopAuto);
+    frame.addEventListener("mouseleave", startAuto);
+
+    // Swipe (mobile)
+    let touchStartX = null;
+    frame.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+      stopAuto();
+    }, { passive: true });
+
+    frame.addEventListener("touchend", (e) => {
+      if (touchStartX == null) return;
+      const endX = e.changedTouches[0].clientX;
+      const dx = endX - touchStartX;
+      if (Math.abs(dx) > 40) {
+        if (dx < 0) next(); else prev();
+      }
+      touchStartX = null;
+      startAuto();
+    }, { passive: true });
+  </script>
+</body>
+</html>
