@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Management | Cheat Day Catering</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-heading {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      padding: 0 20px;
+      text-align: left;
+    }
+
+    .orders-top {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      max-width: 1200px;
+      margin: 0 auto 22px;
+      padding: 0 20px;
+    }
+
+    .summary-card {
+      background: #FFFACD;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    .summary-card h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .summary-card strong {
+      display: block;
+      font-size: 2rem;
+      color: #333;
+    }
+
+    .filter-bar {
+      max-width: 1200px;
+      margin: 0 auto 12px;
+      padding: 0 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      justify-content: space-between;
+    }
+
+    .filter-bar .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-bar label {
+      font-weight: 700;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    .filter-bar select {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .orders-list {
+      max-width: 1200px;
+      margin: 0 auto 40px;
+      padding: 0 20px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .order-card {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 18px;
+      padding: 22px;
+      display: grid;
+      gap: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .order-card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .order-card-details {
+      display: grid;
+      gap: 12px;
+    }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .order-row div {
+      min-width: 180px;
+      color: #444;
+      font-size: 0.95rem;
+    }
+
+    .order-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 96px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #333;
+      border: 1px solid transparent;
+    }
+
+    .status-pending { background: rgba(255, 228, 181, 0.8); border-color: #f3d88b; }
+    .status-preparing { background: rgba(183, 168, 221, 0.25); border-color: #b39ddb; }
+    .status-ready { background: rgba(168, 255, 202, 0.8); border-color: #7bd8a9; }
+    .status-completed { background: rgba(210, 210, 210, 0.4); border-color: #bbb; }
+    .status-cancelled { background: rgba(255, 180, 180, 0.8); border-color: #e07a7a; }
+
+    .order-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .order-actions .btn {
+      min-width: 140px;
+    }
+
+    .order-items {
+      margin: 0;
+      padding-left: 18px;
+      color: #555;
+      font-size: 0.94rem;
+      line-height: 1.5;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      border: 1px dashed #ddd;
+      border-radius: 18px;
+      background: #fff;
+      color: #666;
+      font-size: 1rem;
+    }
+
+    @media (max-width: 720px) {
+      .order-card {
+        padding: 18px;
+      }
+      .order-row div { min-width: 100%; }
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      .order-actions { justify-content: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo">
+      <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="menu.html">Menu</a>
+      <a href="cart.html" class="cart-link">
+        Cart <span id="cartCount" class="cart-badge">0</span>
+      </a>
+      <a href="staff_login.html">Staff Login</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-heading">
+      <h1>Order Management</h1>
+      <p class="muted">Review every order, update status, and keep the kitchen moving. Changes are saved in demo mode so you can test workflow without a backend.</p>
+    </section>
+
+    <div class="orders-top">
+      <div class="summary-card">
+        <h3>Total orders</h3>
+        <strong id="summaryTotal">0</strong>
+      </div>
+      <div class="summary-card">
+        <h3>Pending</h3>
+        <strong id="summaryPending">0</strong>
+      </div>
+      <div class="summary-card">
+        <h3>Preparing</h3>
+        <strong id="summaryPreparing">0</strong>
+      </div>
+      <div class="summary-card">
+        <h3>Ready</h3>
+        <strong id="summaryReady">0</strong>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="statusFilter">Filter by status</label>
+        <select id="statusFilter">
+          <option value="all">All orders</option>
+          <option value="Pending">Pending</option>
+          <option value="Preparing">Preparing</option>
+          <option value="Ready">Ready</option>
+          <option value="Completed">Completed</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary" id="resetOrders">Reset demo orders</button>
+    </div>
+
+    <div class="orders-list" id="ordersList"></div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3>Contact Us</h3>
+        <p>Phone: (210) 722-0119</p>
+      </div>
+      <div class="footer-column">
+        <h3>Follow Us</h3>
+        <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast">Saved!</div>
+
+  <script>
+    const CART_KEY = "cheatday_cart";
+    function getCart() { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
+    function cartCount() { return getCart().reduce((sum, line) => sum + (line.qty || 0), 0); }
+    function updateCartCount() { const el = document.getElementById("cartCount"); if (el) el.textContent = cartCount(); }
+    updateCartCount();
+    window.addEventListener("storage", (e) => { if (e.key === CART_KEY) updateCartCount(); });
+
+    const ORDERS_KEY = "cheatday_orders_demo";
+    const defaultOrders = [
+      {
+        id: "A101",
+        customer: "Jasmine T.",
+        items: ["Buffalo Wings", "Loaded Fries"],
+        total: 28.45,
+        status: "Pending",
+        placed: "10:05 AM"
+      },
+      {
+        id: "A102",
+        customer: "Marcus L.",
+        items: ["BBQ Chicken Sandwich", "Sweet Tea"],
+        total: 16.90,
+        status: "Preparing",
+        placed: "10:12 AM"
+      },
+      {
+        id: "A103",
+        customer: "Olivia R.",
+        items: ["Chicken Wing Platter", "Coleslaw"],
+        total: 34.00,
+        status: "Ready",
+        placed: "10:20 AM"
+      },
+      {
+        id: "A104",
+        customer: "Tyler S.",
+        items: ["Trailer Park Nachos"],
+        total: 12.75,
+        status: "Completed",
+        placed: "9:55 AM"
+      }
+    ];
+
+    let orders = [];
+    let toastTimer = null;
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function loadOrders() {
+      const stored = localStorage.getItem(ORDERS_KEY);
+      if (!stored) {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(defaultOrders));
+        return defaultOrders.slice();
+      }
+      try {
+        return JSON.parse(stored);
+      } catch {
+        localStorage.setItem(ORDERS_KEY, JSON.stringify(defaultOrders));
+        return defaultOrders.slice();
+      }
+    }
+
+    function saveOrders() {
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    }
+
+    function statusClass(status) {
+      return {
+        Pending: "status-pending",
+        Preparing: "status-preparing",
+        Ready: "status-ready",
+        Completed: "status-completed",
+        Cancelled: "status-cancelled"
+      }[status] || "status-pending";
+    }
+
+    function formatCurrency(value) {
+      return `$${value.toFixed(2)}`;
+    }
+
+    function getNextAction(status) {
+      if (status === "Pending") return { label: "Start preparing", next: "Preparing", style: "btn-primary" };
+      if (status === "Preparing") return { label: "Mark ready", next: "Ready", style: "btn-primary" };
+      if (status === "Ready") return { label: "Complete order", next: "Completed", style: "btn-primary" };
+      return null;
+    }
+
+    function updateSummary() {
+      const total = orders.length;
+      const counts = orders.reduce((acc, order) => {
+        acc[order.status] = (acc[order.status] || 0) + 1;
+        return acc;
+      }, {});
+      document.getElementById("summaryTotal").textContent = total;
+      document.getElementById("summaryPending").textContent = counts.Pending || 0;
+      document.getElementById("summaryPreparing").textContent = counts.Preparing || 0;
+      document.getElementById("summaryReady").textContent = counts.Ready || 0;
+    }
+
+    function renderOrders() {
+      const container = document.getElementById("ordersList");
+      const filter = document.getElementById("statusFilter").value;
+      const filtered = orders.filter(order => filter === "all" || order.status === filter);
+      container.innerHTML = "";
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="empty-state">No orders match that filter. Try a different status or reset demo orders.</div>`;
+        return;
+      }
+
+      filtered.forEach(order => {
+        const action = getNextAction(order.status);
+        const itemsHtml = order.items.map(item => `<li>${item}</li>`).join("");
+
+        const card = document.createElement("section");
+        card.className = "order-card";
+        card.innerHTML = `
+          <div class="order-card-header">
+            <div>
+              <strong>Order ${order.id}</strong>
+              <div class="order-row">
+                <div><strong>Customer:</strong> ${order.customer}</div>
+                <div><strong>Placed:</strong> ${order.placed}</div>
+              </div>
+            </div>
+            <span class="status-pill ${statusClass(order.status)}">${order.status}</span>
+          </div>
+          <div class="order-row order-meta">
+            <div><strong>Items</strong><ul class="order-items">${itemsHtml}</ul></div>
+            <div><strong>Total</strong><div>${formatCurrency(order.total)}</div></div>
+          </div>
+          <div class="order-actions"></div>
+        `;
+
+        const actionsContainer = card.querySelector(".order-actions");
+        if (action) {
+          const nextButton = document.createElement("button");
+          nextButton.type = "button";
+          nextButton.className = `btn ${action.style}`;
+          nextButton.textContent = action.label;
+          nextButton.addEventListener("click", () => changeStatus(order.id, action.next));
+          actionsContainer.appendChild(nextButton);
+        }
+
+        if (order.status !== "Completed" && order.status !== "Cancelled") {
+          const cancelButton = document.createElement("button");
+          cancelButton.type = "button";
+          cancelButton.className = "btn btn-secondary";
+          cancelButton.textContent = "Cancel order";
+          cancelButton.addEventListener("click", () => changeStatus(order.id, "Cancelled"));
+          actionsContainer.appendChild(cancelButton);
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    function changeStatus(orderId, nextStatus) {
+      orders = orders.map(order => order.id === orderId ? { ...order, status: nextStatus } : order);
+      saveOrders();
+      updateSummary();
+      renderOrders();
+      showToast(`Order ${orderId} set to ${nextStatus}`);
+    }
+
+    document.getElementById("statusFilter").addEventListener("change", renderOrders);
+    document.getElementById("resetOrders").addEventListener("click", () => {
+      localStorage.removeItem(ORDERS_KEY);
+      orders = loadOrders();
+      updateSummary();
+      renderOrders();
+      showToast("Demo orders reset");
+    });
+
+    orders = loadOrders();
+    updateSummary();
+    renderOrders();
+  </script>
+</body>
+</html>
