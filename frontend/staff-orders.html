@@ -101,11 +101,6 @@
       align-items: center;
     }
 
-    .order-card-details {
-      display: grid;
-      gap: 12px;
-    }
-
     .order-row {
       display: flex;
       justify-content: space-between;
@@ -118,12 +113,6 @@
       min-width: 180px;
       color: #444;
       font-size: 0.95rem;
-    }
-
-    .order-meta {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
     }
 
     .status-pill {
@@ -139,11 +128,13 @@
       border: 1px solid transparent;
     }
 
+    /* Status Colors */
     .status-pending { background: rgba(255, 228, 181, 0.8); border-color: #f3d88b; }
-    .status-preparing { background: rgba(183, 168, 221, 0.25); border-color: #b39ddb; }
+    .status-confirmed { background: rgba(183, 168, 221, 0.4); border-color: #b39ddb; }
+    .status-in-prep { background: rgba(135, 206, 250, 0.4); border-color: #87cefa; }
     .status-ready { background: rgba(168, 255, 202, 0.8); border-color: #7bd8a9; }
     .status-completed { background: rgba(210, 210, 210, 0.4); border-color: #bbb; }
-    .status-cancelled { background: rgba(255, 180, 180, 0.8); border-color: #e07a7a; }
+    .status-canceled { background: rgba(255, 180, 180, 0.8); border-color: #e07a7a; }
 
     .order-actions {
       display: flex;
@@ -156,14 +147,6 @@
       min-width: 140px;
     }
 
-    .order-items {
-      margin: 0;
-      padding-left: 18px;
-      color: #555;
-      font-size: 0.94rem;
-      line-height: 1.5;
-    }
-
     .empty-state {
       text-align: center;
       padding: 48px 20px;
@@ -171,17 +154,20 @@
       border-radius: 18px;
       background: #fff;
       color: #666;
-      font-size: 1rem;
     }
 
-    @media (max-width: 720px) {
-      .order-card {
-        padding: 18px;
-      }
-      .order-row div { min-width: 100%; }
-      .filter-bar { flex-direction: column; align-items: stretch; }
-      .order-actions { justify-content: stretch; }
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      display: none;
+      z-index: 1000;
     }
+    #toast.show { display: block; }
   </style>
 </head>
 <body>
@@ -202,21 +188,21 @@
   <main>
     <section class="page-heading">
       <h1>Order Management</h1>
-      <p class="muted">Review every order, update status, and keep the kitchen moving. Changes are saved in demo mode so you can test workflow without a backend.</p>
+      <p class="muted">Live Dashboard: Manage active orders and update production status.</p>
     </section>
 
     <div class="orders-top">
       <div class="summary-card">
-        <h3>Total orders</h3>
+        <h3>Total Orders</h3>
         <strong id="summaryTotal">0</strong>
       </div>
       <div class="summary-card">
         <h3>Pending</h3>
-        <strong id="summaryPending">0</strong>
+        <strong id="summaryIncoming">0</strong>
       </div>
       <div class="summary-card">
-        <h3>Preparing</h3>
-        <strong id="summaryPreparing">0</strong>
+        <h3>In Prep</h3>
+        <strong id="summaryInPrep">0</strong>
       </div>
       <div class="summary-card">
         <h3>Ready</h3>
@@ -230,13 +216,13 @@
         <select id="statusFilter">
           <option value="all">All orders</option>
           <option value="Pending">Pending</option>
-          <option value="Preparing">Preparing</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="In Prep">In Prep</option>
           <option value="Ready">Ready</option>
           <option value="Completed">Completed</option>
-          <option value="Cancelled">Cancelled</option>
+          <option value="Canceled">Canceled</option>
         </select>
       </div>
-      <button class="btn btn-secondary" id="resetOrders">Reset demo orders</button>
     </div>
 
     <div class="orders-list" id="ordersList"></div>
@@ -248,58 +234,14 @@
         <h3>Contact Us</h3>
         <p>Phone: (210) 722-0119</p>
       </div>
-      <div class="footer-column">
-        <h3>Follow Us</h3>
-        <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
-      </div>
     </div>
   </footer>
 
   <div id="toast" class="toast">Saved!</div>
 
   <script>
-    const CART_KEY = "cheatday_cart";
-    function getCart() { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
-    function cartCount() { return getCart().reduce((sum, line) => sum + (line.qty || 0), 0); }
-    function updateCartCount() { const el = document.getElementById("cartCount"); if (el) el.textContent = cartCount(); }
-    updateCartCount();
-    window.addEventListener("storage", (e) => { if (e.key === CART_KEY) updateCartCount(); });
-
-    const ORDERS_KEY = "cheatday_orders_demo";
-    const defaultOrders = [
-      {
-        id: "A101",
-        customer: "Jasmine T.",
-        items: ["Buffalo Wings", "Loaded Fries"],
-        total: 28.45,
-        status: "Pending",
-        placed: "10:05 AM"
-      },
-      {
-        id: "A102",
-        customer: "Marcus L.",
-        items: ["BBQ Chicken Sandwich", "Sweet Tea"],
-        total: 16.90,
-        status: "Preparing",
-        placed: "10:12 AM"
-      },
-      {
-        id: "A103",
-        customer: "Olivia R.",
-        items: ["Chicken Wing Platter", "Coleslaw"],
-        total: 34.00,
-        status: "Ready",
-        placed: "10:20 AM"
-      },
-      {
-        id: "A104",
-        customer: "Tyler S.",
-        items: ["Trailer Park Nachos"],
-        total: 12.75,
-        status: "Completed",
-        placed: "9:55 AM"
-      }
-    ];
+    // 1. CONFIGURATION
+    const API_BASE_URL = "https://1p13n3k8d5.execute-api.us-east-1.amazonaws.com/test";
 
     let orders = [];
     let toastTimer = null;
@@ -309,81 +251,115 @@
       toast.textContent = message;
       toast.classList.add("show");
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2000);
     }
 
-    function loadOrders() {
-      const stored = localStorage.getItem(ORDERS_KEY);
-      if (!stored) {
-        localStorage.setItem(ORDERS_KEY, JSON.stringify(defaultOrders));
-        return defaultOrders.slice();
-      }
+    // 2. FETCH ORDERS (Global Fetch)
+    async function loadOrders() {
+      // We always fetch the full list so our summary counts stay accurate
+      const url = `${API_BASE_URL}/staff/orders`; 
+
       try {
-        return JSON.parse(stored);
-      } catch {
-        localStorage.setItem(ORDERS_KEY, JSON.stringify(defaultOrders));
-        return defaultOrders.slice();
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data && data.orders) {
+            orders = data.orders.map(o => ({
+                id: o.Order_ID,
+                customer: `${o.First_name} ${o.Last_name}`,
+                total: parseFloat(o.Total_amount || 0),
+                status: o.status,
+                placed: new Date(o.Order_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }));
+        } else {
+            orders = [];
+        }
+
+        updateSummary(); // Calculates based on the full list
+        renderOrders();  // Handles local filtering
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        showToast("Error: Could not load live orders.");
       }
     }
 
-    function saveOrders() {
-      localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    // 3. PATCH STATUS
+    async function changeStatus(orderId, nextStatus) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/staff/orders/${orderId}/status`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nextStatus })
+        });
+
+        if (response.ok) {
+          showToast(`Order #${orderId} updated to ${nextStatus}`);
+          loadOrders(); // Re-fetch the full list after an update
+        } else {
+          const errData = await response.json();
+          showToast(`Error: ${errData.detail || "Update failed"}`);
+        }
+      } catch (err) {
+        showToast("Network error during update.");
+      }
     }
 
+    // --- LOGIC HELPERS ---
     function statusClass(status) {
-      return {
-        Pending: "status-pending",
-        Preparing: "status-preparing",
-        Ready: "status-ready",
-        Completed: "status-completed",
-        Cancelled: "status-cancelled"
-      }[status] || "status-pending";
-    }
-
-    function formatCurrency(value) {
-      return `$${value.toFixed(2)}`;
+      const mapping = {
+        "Pending": "status-pending",
+        "Confirmed": "status-confirmed",
+        "In Prep": "status-in-prep",
+        "Ready": "status-ready",
+        "Completed": "status-completed",
+        "Canceled": "status-canceled"
+      };
+      return mapping[status] || "status-pending";
     }
 
     function getNextAction(status) {
-      if (status === "Pending") return { label: "Start preparing", next: "Preparing", style: "btn-primary" };
-      if (status === "Preparing") return { label: "Mark ready", next: "Ready", style: "btn-primary" };
-      if (status === "Ready") return { label: "Complete order", next: "Completed", style: "btn-primary" };
+      if (status === "Pending") return { label: "Confirm Order", next: "Confirmed", style: "btn-primary" };
+      if (status === "Confirmed") return { label: "Start Cooking", next: "In Prep", style: "btn-primary" };
+      if (status === "In Prep") return { label: "Mark Ready", next: "Ready", style: "btn-primary" };
+      if (status === "Ready") return { label: "Complete Order", next: "Completed", style: "btn-primary" };
       return null;
     }
 
     function updateSummary() {
-      const total = orders.length;
-      const counts = orders.reduce((acc, order) => {
-        acc[order.status] = (acc[order.status] || 0) + 1;
+      // Logic: Counts every order in the 'orders' array, regardless of dropdown filter
+      const counts = orders.reduce((acc, o) => {
+        acc[o.status] = (acc[o.status] || 0) + 1;
         return acc;
       }, {});
-      document.getElementById("summaryTotal").textContent = total;
-      document.getElementById("summaryPending").textContent = counts.Pending || 0;
-      document.getElementById("summaryPreparing").textContent = counts.Preparing || 0;
-      document.getElementById("summaryReady").textContent = counts.Ready || 0;
+
+      document.getElementById("summaryTotal").textContent = orders.length;
+      document.getElementById("summaryIncoming").textContent = (counts["Pending"] || 0) + (counts["Confirmed"] || 0);
+      document.getElementById("summaryInPrep").textContent = counts["In Prep"] || 0;
+      document.getElementById("summaryReady").textContent = counts["Ready"] || 0;
     }
 
+    // 4. RENDER ORDERS (Local Filtering)
     function renderOrders() {
       const container = document.getElementById("ordersList");
-      const filter = document.getElementById("statusFilter").value;
-      const filtered = orders.filter(order => filter === "all" || order.status === filter);
+      const filter = document.getElementById("statusFilter").value; 
       container.innerHTML = "";
 
-      if (!filtered.length) {
-        container.innerHTML = `<div class="empty-state">No orders match that filter. Try a different status or reset demo orders.</div>`;
+      // Filter the orders LOCALLY in the browser
+      const filteredOrders = orders.filter(o => filter === "all" || o.status === filter);
+
+      if (!filteredOrders.length) {
+        container.innerHTML = `<div class="empty-state">No ${filter} orders found.</div>`;
         return;
       }
 
-      filtered.forEach(order => {
+      filteredOrders.forEach(order => {
         const action = getNextAction(order.status);
-        const itemsHtml = order.items.map(item => `<li>${item}</li>`).join("");
-
         const card = document.createElement("section");
         card.className = "order-card";
         card.innerHTML = `
           <div class="order-card-header">
             <div>
-              <strong>Order ${order.id}</strong>
+              <strong>Order #${order.id}</strong>
               <div class="order-row">
                 <div><strong>Customer:</strong> ${order.customer}</div>
                 <div><strong>Placed:</strong> ${order.placed}</div>
@@ -392,55 +368,36 @@
             <span class="status-pill ${statusClass(order.status)}">${order.status}</span>
           </div>
           <div class="order-row order-meta">
-            <div><strong>Items</strong><ul class="order-items">${itemsHtml}</ul></div>
-            <div><strong>Total</strong><div>${formatCurrency(order.total)}</div></div>
+            <div><strong>Total:</strong> $${order.total.toFixed(2)}</div>
           </div>
           <div class="order-actions"></div>
         `;
 
         const actionsContainer = card.querySelector(".order-actions");
         if (action) {
-          const nextButton = document.createElement("button");
-          nextButton.type = "button";
-          nextButton.className = `btn ${action.style}`;
-          nextButton.textContent = action.label;
-          nextButton.addEventListener("click", () => changeStatus(order.id, action.next));
-          actionsContainer.appendChild(nextButton);
+          const btn = document.createElement("button");
+          btn.className = `btn ${action.style}`;
+          btn.textContent = action.label;
+          btn.onclick = () => changeStatus(order.id, action.next);
+          actionsContainer.appendChild(btn);
         }
 
-        if (order.status !== "Completed" && order.status !== "Cancelled") {
-          const cancelButton = document.createElement("button");
-          cancelButton.type = "button";
-          cancelButton.className = "btn btn-secondary";
-          cancelButton.textContent = "Cancel order";
-          cancelButton.addEventListener("click", () => changeStatus(order.id, "Cancelled"));
-          actionsContainer.appendChild(cancelButton);
+        if (order.status !== "Completed" && order.status !== "Canceled") {
+          const cancelBtn = document.createElement("button");
+          cancelBtn.className = "btn btn-secondary";
+          cancelBtn.textContent = "Cancel";
+          cancelBtn.onclick = () => changeStatus(order.id, "Canceled");
+          actionsContainer.appendChild(cancelBtn);
         }
-
         container.appendChild(card);
       });
     }
 
-    function changeStatus(orderId, nextStatus) {
-      orders = orders.map(order => order.id === orderId ? { ...order, status: nextStatus } : order);
-      saveOrders();
-      updateSummary();
-      renderOrders();
-      showToast(`Order ${orderId} set to ${nextStatus}`);
-    }
-
+    // Use renderOrders for the listener so filtering is instant
     document.getElementById("statusFilter").addEventListener("change", renderOrders);
-    document.getElementById("resetOrders").addEventListener("click", () => {
-      localStorage.removeItem(ORDERS_KEY);
-      orders = loadOrders();
-      updateSummary();
-      renderOrders();
-      showToast("Demo orders reset");
-    });
-
-    orders = loadOrders();
-    updateSummary();
-    renderOrders();
+    
+    // Initial data fetch
+    loadOrders();
   </script>
 </body>
 </html>
