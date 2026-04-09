@@ -8,50 +8,49 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
-    .login-wrap{
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 30px 20px 50px;
-      text-align: left;
+    /* Centers the entire login area */
+    .login-wrap {
+      max-width: 500px; /* Narrower for a single-column look */
+      margin: 60px auto; /* More top margin to center it vertically on the screen */
+      padding: 0 20px;
     }
 
-    .login-grid{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 22px;
-      align-items: start;
-    }
-    @media (max-width: 900px){
-      .login-grid{ grid-template-columns: 1fr; }
+    /* Simplified to a single column */
+    .login-grid {
+      display: flex;
+      justify-content: center;
     }
 
-    .panel{
+    .panel {
       background: #FFFACD;
       border: 1px solid #ddd;
       border-radius: 14px;
-      padding: 20px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+      padding: 30px; /* Extra padding for a cleaner look */
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      width: 100%;
     }
 
-    .panel h1, .panel h2{
-      margin: 0 0 10px;
+    .panel h2 {
+      margin: 0 0 15px;
       color: #333;
+      text-align: center; /* Center the "Sign in" header */
     }
 
-    .muted{
+    .muted {
       color: #666;
       font-size: 14px;
       line-height: 1.45;
+      text-align: center; /* Center the demo badge text */
     }
 
-    .form-grid{
+    .form-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 12px;
+      gap: 15px;
+      margin-top: 20px;
     }
 
-    .field label{
+    .field label {
       display: block;
       font-size: 13px;
       font-weight: 800;
@@ -59,60 +58,59 @@
       margin-bottom: 6px;
     }
 
-    .field input{
+    .field input {
       width: 100%;
-      max-width: 450px; /* This prevents them from becoming too long */
-      padding: 11px 12px;
+      box-sizing: border-box; /* Ensures padding doesn't break the width */
+      padding: 12px;
       border-radius: 12px;
       border: 1px solid #ddd;
       outline: none;
       font-size: 14px;
       background: #fff;
     }
-    .field input:focus{
+
+    .field input:focus {
       border-color: #B39DDB;
       box-shadow: 0 0 0 3px rgba(179,157,219,0.25);
     }
 
-    .btn-row{
+    .btn-row {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
+      flex-direction: column; /* Stack buttons for a cleaner mobile-friendly look */
+      gap: 12px;
+      margin-top: 20px;
     }
 
-    .btn{
-      padding: 12px 14px;
+    .btn {
+      padding: 14px;
       border: none;
       border-radius: 12px;
       font-weight: 900;
       cursor: pointer;
-      text-shadow: 0px 0px 2px rgba(255,255,255,0.35);
       transition: background 0.2s ease, transform 0.15s ease;
     }
-    .btn-primary{
+
+    .btn-primary {
       background: #333;
       color: #fff;
-      flex: 1;
-      min-width: 200px;
     }
-    .btn-primary:hover{
+
+    .btn-primary:hover {
       background: #9575CD;
       transform: translateY(-1px);
     }
-    .btn-secondary{
+
+    .btn-secondary {
       background: #fff;
       color: #333;
       border: 1px solid #ddd;
-      flex: 1;
-      min-width: 170px;
-    }
-    .btn-secondary:hover{
-      border-color: #B39DDB;
-      transform: translateY(-1px);
     }
 
-    .badge-pill{
+    .btn-secondary:hover {
+      border-color: #B39DDB;
+    }
+
+    .badge-pill {
       display: inline-block;
       padding: 4px 10px;
       border-radius: 999px;
@@ -121,32 +119,10 @@
       color: #333;
       font-weight: 900;
       font-size: 12px;
+      margin-bottom: 8px;
     }
 
-    .quick-links{
-      margin-top: 12px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .link-card{
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 12px;
-      padding: 12px;
-    }
-    .link-card h3{
-      margin: 0 0 6px;
-      font-size: 15px;
-      color: #333;
-    }
-    .link-card p{
-      margin: 0;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .toast{
+    .toast {
       position: fixed;
       right: 16px;
       bottom: 16px;
@@ -163,14 +139,14 @@
       z-index: 9999;
       border: 1px solid rgba(179,157,219,0.7);
     }
-    .toast.show{ opacity: 1; transform: translateY(0); }
+    .toast.show { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 
 <body>
   <header>
     <a href="index.html" class="logo">
-      <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
+      <img src="images/weezler.svg" alt="Cheat Day Logo" class="logo-img">
     </a>
     <nav>
       <a href="index.html">Home</a>
@@ -178,22 +154,21 @@
       <a href="cart.html" class="cart-link">
         Cart <span id="cartCount" class="cart-badge">0</span>
       </a>
-      <a href="login.html">Staff Login</a>
+      <a href="staff_login.html">Staff Login</a>
     </nav>
   </header>
 
-  <h1>Staff Login</h1>
+  <h1 style="text-align: center; margin-top: 40px;">Staff Login</h1>
 
   <main>
     <div class="login-wrap">
       <div class="login-grid">
-        <!-- LEFT: LOGIN FORM -->
         <section class="panel" aria-label="Login form">
           <h2>Sign in</h2>
-          <p class="muted">
+          <div class="muted">
             <span class="badge-pill">Demo Mode</span>
-            Permissions will be determined by your backend later (based on who logs in).
-          </p>
+            <p>Authorized personnel only.</p>
+          </div>
 
           <form id="loginForm" autocomplete="on">
             <div class="form-grid">
@@ -212,41 +187,7 @@
               <button class="btn btn-primary" type="submit">Login</button>
               <button class="btn btn-secondary" id="demoFill" type="button">Use Demo Login</button>
             </div>
-
-            <p class="muted" style="margin-top:10px;">
-              Later: this becomes <code>POST /api/auth/login</code> and returns user info + permissions.
-            </p>
           </form>
-        </section>
-
-        <!-- RIGHT: WHAT YOU'LL SEE AFTER LOGIN -->
-        <section class="panel" aria-label="After login info">
-          <h2>After you log in</h2>
-          <p class="muted">
-            Based on your account permissions, you may see:
-          </p>
-
-          <div class="quick-links">
-            <div class="link-card">
-              <h3>Orders Dashboard</h3>
-              <p>View incoming orders, update status, and track fulfillment.</p>
-            </div>
-
-            <div class="link-card">
-              <h3>Financials</h3>
-              <p>Revenue summaries, sales totals, and reporting (restricted by permissions).</p>
-            </div>
-
-            <div class="link-card">
-              <h3>Other Tools</h3>
-              <p>Employee tools, customer support info, and admin settings (permission-based).</p>
-            </div>
-          </div>
-
-          <p class="muted" style="margin-top:12px;">
-            Example pages you can build later:<br>
-            <code>staff-dashboard.html</code>, <code>staff-orders.html</code>, <code>staff-financials.html</code>
-          </p>
         </section>
       </div>
     </div>
@@ -296,25 +237,17 @@
       localStorage.setItem(AUTH_KEY, JSON.stringify({
         email,
         loginAt: new Date().toISOString()
-        // Later: backend will also return permissions/roles
       }));
     }
 
     function handleLogin(email, password) {
-      // DEMO ONLY
-      // Replace with: fetch('/api/auth/login') later
       const e = email.toLowerCase();
-
-      // Example demo accounts:
-      // owner: owner@cheatday.com / owner123
-      // employee: employee@cheatday.com / employee123
       if (e === "owner@cheatday.com" && password === "owner123") return "owner";
       if (e === "employee@cheatday.com" && password === "employee123") return "employee";
       return null;
     }
 
     document.getElementById("demoFill").addEventListener("click", () => {
-      // default demo account
       document.getElementById("email").value = "employee@cheatday.com";
       document.getElementById("password").value = "employee123";
       showToast("Demo login filled");
@@ -322,24 +255,22 @@
 
     document.getElementById("loginForm").addEventListener("submit", (e) => {
       e.preventDefault();
-
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
       const type = handleLogin(email, password);
       if (!type) {
-        showToast("Invalid login (demo). Try demo login.");
+        showToast("Invalid login. Try demo credentials.");
         return;
       }
 
       saveDemoSession(email);
       showToast("Logged in!");
 
-      // Demo redirect: backend permissions will control this later
+      // Redirect logic
       if (type === "owner") window.location.href = "staff-dashboard.html";
       else window.location.href = "staff-orders.html";
     });
   </script>
 </body>
 </html>
-

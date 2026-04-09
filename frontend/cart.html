@@ -97,25 +97,23 @@
 <body>
   <header>
     <a href="index.html" class="logo">
-      <img src="images/logo.png" alt="Cheat Day Logo" class="logo-img">
+      <img src="images/weezler.svg" alt="Cheat Day Logo" class="logo-img">
     </a>
     <nav>
       <a href="index.html">Home</a>
       <a href="menu.html">Menu</a>
-      <a href="cart.html" class="cart-link">
+      <a href="cart.html" class="cart-link active">
         Cart <span id="cartCount" class="cart-badge">0</span>
       </a>
       <a href="staff_login.html">Staff Login</a>
     </nav>
   </header>
 
-  <h1>Your Cart</h1>
-
   <main>
     <div class="cart-wrap">
+        <h1 style="margin-bottom: 20px;">Your Cart</h1>
       <div class="cart-grid">
 
-        <!-- LEFT: CART -->
         <section class="panel" aria-label="Cart items">
           <h2>Items</h2>
 
@@ -146,13 +144,12 @@
             </div>
 
             <div class="btn-row">
-              <button id="continueBtn" class="btn btn-primary" type="button">Continue to Checkout</button>
+              <button id="continueBtn" class="btn btn-primary" type="button">Place Order</button>
               <button id="clearBtn" class="btn btn-secondary" type="button">Clear Cart</button>
             </div>
           </div>
         </section>
 
-        <!-- RIGHT: BILLING + PAYMENT -->
         <section class="panel" aria-label="Billing and payment">
           <h2>Billing Information</h2>
 
@@ -212,7 +209,7 @@
               <div class="pay-option">
                 <label>
                   <input type="radio" name="paymentMethod" value="card" checked />
-                  Credit / Debit Card
+                  Credit / Debit Card (Demo)
                 </label>
                 <div class="pay-details active" data-method="card">
                   <div class="form-grid">
@@ -222,71 +219,13 @@
                     </div>
                     <div class="field full">
                       <label for="cardNumber">Card Number</label>
-                      <input id="cardNumber" name="cardNumber" inputmode="numeric" placeholder="1234 5678 9012 3456" />
-                    </div>
-                    <div class="field">
-                      <label for="exp">Expiration</label>
-                      <input id="exp" name="exp" placeholder="MM/YY" />
-                    </div>
-                    <div class="field">
-                      <label for="cvv">CVV</label>
-                      <input id="cvv" name="cvv" inputmode="numeric" placeholder="123" />
+                      <input id="cardNumber" name="cardNumber" inputmode="numeric" placeholder="4242 4242 4242 4242" />
                     </div>
                   </div>
-                  <div class="muted">Demo only. Don’t store real card info in localStorage in a real app.</div>
-                </div>
-              </div>
-
-              <div class="pay-option">
-                <label>
-                  <input type="radio" name="paymentMethod" value="cashapp" />
-                  Cash App
-                </label>
-                <div class="pay-details" data-method="cashapp">
-                  <div class="field">
-                    <label for="cashTag">Cash App $Cashtag</label>
-                    <input id="cashTag" name="cashTag" placeholder="$YourCashtag" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="pay-option">
-                <label>
-                  <input type="radio" name="paymentMethod" value="paypal" />
-                  PayPal
-                </label>
-                <div class="pay-details" data-method="paypal">
-                  <div class="field">
-                    <label for="paypalEmail">PayPal Email</label>
-                    <input id="paypalEmail" name="paypalEmail" type="email" placeholder="paypal@email.com" />
-                  </div>
-                </div>
-              </div>
-
-              <div class="pay-option">
-                <label>
-                  <input type="radio" name="paymentMethod" value="applepay" />
-                  Apple Pay
-                </label>
-                <div class="pay-details" data-method="applepay">
-                  <div class="muted">Demo: Apple Pay requires a payment provider (Stripe/Square) + supported device.</div>
-                </div>
-              </div>
-
-              <div class="pay-option">
-                <label>
-                  <input type="radio" name="paymentMethod" value="googlepay" />
-                  Google Pay
-                </label>
-                <div class="pay-details" data-method="googlepay">
-                  <div class="muted">Demo: Google Pay requires a payment provider + supported browser/device.</div>
                 </div>
               </div>
             </div>
-
-            <div class="muted">
-              Billing/payment choices are saved locally for now so checkout can reuse them.
-            </div>
+            <div class="muted">Payments are currently in test mode for Capstone Project.</div>
           </form>
         </section>
 
@@ -311,11 +250,14 @@
   <div id="toast" class="toast">Saved!</div>
 
   <script>
+    // --- CONFIG ---
+    const API_BASE_URL = "https://1p13n3k8d5.execute-api.us-east-1.amazonaws.com/test";
     const CART_KEY = "cheatday_cart";
     const BILLING_KEY = "cheatday_billing";
     const PAYMENT_KEY = "cheatday_payment";
     const TAX_RATE = 0.0825;
 
+    // --- CORE CART LOGIC ---
     function getCart(){ return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
     function setCart(cart){
       localStorage.setItem(CART_KEY, JSON.stringify(cart));
@@ -327,11 +269,13 @@
       if (el) el.textContent = cartCount();
     }
     function money(n){ return Number(n||0).toLocaleString(undefined,{style:"currency",currency:"USD"}); }
+    
     function calcTotals(cart){
       const subtotal = cart.reduce((s,x)=>s+(Number(x.price)*Number(x.qty)),0);
       const tax = subtotal * TAX_RATE;
       return { subtotal, tax, total: subtotal + tax };
     }
+
     function escapeHTML(str){
       return String(str).replace(/[&<>"']/g, s => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
@@ -391,6 +335,7 @@
       document.getElementById("total").textContent = money(totals.total);
     }
 
+    // --- INTERACTION HELPERS ---
     function incItem(id){
       const cart = getCart();
       const line = cart.find(x => x.id === id);
@@ -421,13 +366,9 @@
       showToast("Cart cleared");
     }
 
-    function loadJSON(key){
-      try { return JSON.parse(localStorage.getItem(key) || "null"); }
-      catch { return null; }
-    }
-    function saveJSON(key, val){
-      localStorage.setItem(key, JSON.stringify(val));
-    }
+    // --- FORM LOGIC ---
+    function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+    function loadJSON(key){ try { return JSON.parse(localStorage.getItem(key) || "null"); } catch { return null; } }
 
     function readBillingPaymentForm(){
       const form = document.getElementById("rightForm");
@@ -443,16 +384,6 @@
           state: (fd.get("state") || "").trim(),
           zip: (fd.get("zip") || "").trim(),
           country: (fd.get("country") || "US").trim()
-        },
-        payment: {
-          method: fd.get("paymentMethod"),
-          cashTag: (fd.get("cashTag") || "").trim(),
-          paypalEmail: (fd.get("paypalEmail") || "").trim(),
-          // demo only – do NOT store real card info in production
-          cardName: (fd.get("cardName") || "").trim(),
-          cardNumber: (fd.get("cardNumber") || "").trim(),
-          exp: (fd.get("exp") || "").trim(),
-          cvv: (fd.get("cvv") || "").trim()
         }
       };
     }
@@ -460,12 +391,10 @@
     function fillForm(data){
       if (!data) return;
       const b = data.billing || {};
-      const p = data.payment || {};
       const setVal = (name, val) => {
         const el = document.querySelector(`[name="${name}"]`);
         if (el != null && val != null) el.value = val;
       };
-
       setVal("fullName", b.fullName);
       setVal("email", b.email);
       setVal("phone", b.phone);
@@ -474,61 +403,10 @@
       setVal("city", b.city);
       setVal("state", b.state);
       setVal("zip", b.zip);
-      setVal("country", b.country || "US");
-
-      // payment method
-      const method = p.method || "card";
-      const radio = document.querySelector(`input[name="paymentMethod"][value="${method}"]`);
-      if (radio) radio.checked = true;
-      setPaymentDetails(method);
-
-      setVal("cashTag", p.cashTag);
-      setVal("paypalEmail", p.paypalEmail);
-      setVal("cardName", p.cardName);
-      setVal("cardNumber", p.cardNumber);
-      setVal("exp", p.exp);
-      setVal("cvv", p.cvv);
     }
 
-    function setPaymentDetails(method){
-      document.querySelectorAll(".pay-details").forEach(el=>{
-        el.classList.toggle("active", el.dataset.method === method);
-      });
-    }
-
-    // INIT
-    updateCartCount();
-    renderCart();
-
-    // Restore billing/payment
-    const saved = loadJSON(PAYMENT_KEY);
-    fillForm(saved);
-
-    // Cart interactions
-    document.getElementById("cartBody").addEventListener("click", (e) => {
-      const inc = e.target.closest(".js-inc");
-      const dec = e.target.closest(".js-dec");
-      const rem = e.target.closest(".js-remove");
-      if (inc) incItem(inc.dataset.id);
-      if (dec) decItem(dec.dataset.id);
-      if (rem) removeItem(rem.dataset.id);
-    });
-    document.getElementById("clearBtn").addEventListener("click", clearCart);
-
-    // Payment method toggle
-    document.querySelectorAll('input[name="paymentMethod"]').forEach(r=>{
-      r.addEventListener("change", ()=>setPaymentDetails(r.value));
-    });
-
-    // Save billing/payment as user types
-    document.getElementById("rightForm").addEventListener("input", () => {
-      const data = readBillingPaymentForm();
-      saveJSON(BILLING_KEY, data.billing);
-      saveJSON(PAYMENT_KEY, data);
-    });
-
-    // Continue to checkout
-    document.getElementById("continueBtn").addEventListener("click", () => {
+    // --- API BRIDGE (The Handshake) ---
+    document.getElementById("continueBtn").addEventListener("click", async () => {
       const cart = getCart();
       if (!cart.length) { showToast("Cart is empty"); return; }
 
@@ -539,14 +417,92 @@
         return;
       }
 
+      // 1. Gather Data
       const data = readBillingPaymentForm();
-      saveJSON(BILLING_KEY, data.billing);
-      saveJSON(PAYMENT_KEY, data);
+      const b = data.billing;
+      
+      const nameParts = b.fullName.split(" ");
+      const firstName = nameParts[0] || "Guest";
+      const lastName = nameParts.slice(1).join(" ") || "Customer";
+      const fullAddress = `${b.address1}${b.address2 ? ', ' + b.address2 : ''}, ${b.city}, ${b.state} ${b.zip}`;
 
-      window.location.href = "checkout.html"; // your payment/submit page
+      // 2. Construct Payload for Lambda
+      const orderPayload = {
+        customer: {
+          first_name: firstName,
+          last_name: lastName,
+          email: b.email,
+          phone: b.phone,
+          address: fullAddress
+        },
+        items: cart.map(item => ({
+          product_id: item.id,
+          qty: item.qty,
+          unit_price: item.price
+        }))
+      };
+
+      // 3. POST to AWS
+      try {
+        const btn = document.getElementById("continueBtn");
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Processing Order...";
+
+        const response = await fetch(`${API_BASE_URL}/orders`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload)
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          showToast(`Order #${result.orderId} Placed!`);
+          
+          clearCart(); // Wipes localStorage
+
+          setTimeout(() => {
+            alert(`Order Successful! Your Cheat Day ticket number is #${result.orderId}.`);
+            window.location.href = "index.html"; 
+          }, 1500);
+          
+        } else {
+          const err = await response.json();
+          alert("Error: " + (err.error || "Failed to place order"));
+          btn.disabled = false;
+          btn.textContent = originalText;
+        }
+      } catch (err) {
+        console.error("Submission Error:", err);
+        alert("Network error. Check console.");
+        document.getElementById("continueBtn").disabled = false;
+        document.getElementById("continueBtn").textContent = "Place Order";
+      }
     });
 
-    // Keep badge/table in sync across tabs
+    // --- INIT ---
+    updateCartCount();
+    renderCart();
+
+    const saved = loadJSON(BILLING_KEY);
+    fillForm({ billing: saved });
+
+    document.getElementById("cartBody").addEventListener("click", (e) => {
+      const inc = e.target.closest(".js-inc");
+      const dec = e.target.closest(".js-dec");
+      const rem = e.target.closest(".js-remove");
+      if (inc) incItem(inc.dataset.id);
+      if (dec) decItem(dec.dataset.id);
+      if (rem) removeItem(rem.dataset.id);
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", clearCart);
+
+    document.getElementById("rightForm").addEventListener("input", () => {
+      const data = readBillingPaymentForm();
+      saveJSON(BILLING_KEY, data.billing);
+    });
+
     window.addEventListener("storage", (e) => {
       if (e.key === CART_KEY) {
         updateCartCount();
