@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Management | Cheat Day Catering</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="auth-config.js"></script>
+  <style>
+    /* Table Styling */
+    .mgmt-container { max-width: 1100px; margin: 20px auto; padding: 0 20px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
+    th { background: #f8f8f8; font-weight: 800; color: #333; }
+    tr:hover { background: #fffdf0; }
+    
+    /* Status Pill */
+    .status-badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+    .status-on { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .status-off { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+    /* Modal Styling */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { background: #fff; padding: 30px; border-radius: 16px; width: 100%; max-width: 500px; position: relative; }
+    .modal-content h2 { margin-top: 0; color: #333; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 700; font-size: 0.9rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    
+    .btn-save { background: #b39ddb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+    .btn-cancel { background: #eee; color: #333; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+    
+    #loggedInUser { margin-left: 8px; color: #fff; background: #333; border: 1px solid #b39ddb; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo"><img src="images/weezler.svg" alt="Cheat Day Logo" class="logo-img"></a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="menu.html">Menu</a>
+    <a href="staff-orders.html">Staff Orders</a>
+    <a href="owner_page.html">Owner Metrics</a>
+    <span id="loggedInUser"></span>
+    <a href="#" id="signOutLink">Sign Out</a>
+  </nav>
+</header>
+
+<main class="mgmt-container">
+  <h1>Menu Management</h1>
+  <p class="muted">Edit prices, descriptions, and toggle item availability.</p>
+
+  <table id="inventoryTable">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Price</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="inventoryBody">
+      </tbody>
+  </table>
+</main>
+
+<div class="modal-overlay" id="editModal">
+  <div class="modal-content">
+    <h2 id="modalTitle">Edit Item</h2>
+    <form id="editForm">
+      <input type="hidden" id="editId">
+      <div class="form-group">
+        <label>Price ($)</label>
+        <input type="number" id="editPrice" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="editDesc" rows="4" required></textarea>
+      </div>
+      <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+        <input type="checkbox" id="editAvailable" style="width: auto;">
+        <label for="editAvailable" style="margin: 0;">Mark as Available for Sale</label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn-save">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // FIX 1: POINT TO THE FULL OWNER MENU PATH
+  const API_URL = "https://1p13n3k8d5.execute-api.us-east-1.amazonaws.com/test/owner/menu";
+  let allProducts = [];
+
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(base64));
+    } catch (e) { return null; }
+  }
+
+  function getAuthHeaders() {
+    return { 
+      "Content-Type": "application/json", 
+      "Authorization": `Bearer ${localStorage.getItem("cheatday_id_token")}` 
+    };
+  }
+
+  async function loadInventory() {
+    console.log("Fetching inventory from:", API_URL);
+    try {
+      const res = await fetch(API_URL, { headers: getAuthHeaders() });
+      if (!res.ok) {
+        const errBody = await res.json();
+        console.error("Server Response Error:", errBody);
+        throw new Error(`HTTP Error: ${res.status}`);
+      }
+      allProducts = await res.json();
+      renderTable();
+    } catch (err) { 
+      console.error("Load Inventory Failed:", err);
+      const body = document.getElementById("inventoryBody");
+      body.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error loading data. Check console.</td></tr>`;
+    }
+  }
+
+  function renderTable() {
+    const body = document.getElementById("inventoryBody");
+    if (allProducts.length === 0) {
+        body.innerHTML = `<tr><td colspan="4" style="text-align:center;">No products found in database.</td></tr>`;
+        return;
+    }
+    body.innerHTML = allProducts.map(p => `
+      <tr>
+        <td><strong>${p.Product_name}</strong></td>
+        <td>$${parseFloat(p.Price).toFixed(2)}</td>
+        <td>
+          <span class="status-badge ${p.is_available ? 'status-on' : 'status-off'}">
+            ${p.is_available ? 'AVAILABLE' : 'HIDDEN'}
+          </span>
+        </td>
+        <td>
+          <button class="btn-save" style="padding: 6px 12px; font-size: 12px;" onclick="openModal(${p.Product_ID})">Edit</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function openModal(id) {
+    const product = allProducts.find(p => p.Product_ID === id);
+    document.getElementById("editId").value = product.Product_ID;
+    document.getElementById("modalTitle").textContent = `Edit ${product.Product_name}`;
+    document.getElementById("editPrice").value = product.Price;
+    document.getElementById("editDesc").value = product.Description;
+    document.getElementById("editAvailable").checked = product.is_available === 1;
+    document.getElementById("editModal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("editModal").style.display = "none";
+  }
+
+  document.getElementById("editForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const updatedData = {
+      Product_ID: parseInt(document.getElementById("editId").value),
+      Price: parseFloat(document.getElementById("editPrice").value),
+      Description: document.getElementById("editDesc").value,
+      is_available: document.getElementById("editAvailable").checked ? 1 : 0
+    };
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updatedData)
+      });
+
+      if (res.ok) {
+        alert("Menu updated successfully!");
+        closeModal();
+        loadInventory();
+      } else {
+        alert("Failed to update. Check permissions.");
+      }
+    } catch (err) { console.error(err); }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = localStorage.getItem("cheatday_id_token");
+    const claims = parseJwt(token);
+    
+    // Check for correct group
+    if (!claims || !(claims['cognito:groups'] || []).includes("cheatDay_owner")) {
+      console.warn("User not in owner group. Redirecting...");
+      window.location.replace("staff-orders.html");
+      return;
+    }
+
+    // Set user display
+    const userDisplay = document.getElementById("loggedInUser");
+    userDisplay.textContent = `Logged in as Owner`;
+    userDisplay.style.display = "inline-block";
+
+    // SIGN OUT LOGIC
+    document.getElementById("signOutLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = "staff_login.html";
+    });
+
+    loadInventory();
+  });
+</script>
+</body>
+</html>
