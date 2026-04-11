@@ -6,16 +6,15 @@
   <title>Staff Login | Cheat Day Catering</title>
 
   <link rel="stylesheet" href="style.css" />
+  <script src="auth-config.js"></script>
 
   <style>
-    /* Centers the entire login area */
     .login-wrap {
-      max-width: 500px; /* Narrower for a single-column look */
-      margin: 60px auto; /* More top margin to center it vertically on the screen */
+      max-width: 500px;
+      margin: 60px auto;
       padding: 0 20px;
     }
 
-    /* Simplified to a single column */
     .login-grid {
       display: flex;
       justify-content: center;
@@ -25,7 +24,7 @@
       background: #FFFACD;
       border: 1px solid #ddd;
       border-radius: 14px;
-      padding: 30px; /* Extra padding for a cleaner look */
+      padding: 30px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.15);
       width: 100%;
     }
@@ -33,52 +32,21 @@
     .panel h2 {
       margin: 0 0 15px;
       color: #333;
-      text-align: center; /* Center the "Sign in" header */
+      text-align: center;
     }
 
     .muted {
       color: #666;
       font-size: 14px;
       line-height: 1.45;
-      text-align: center; /* Center the demo badge text */
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 15px;
-      margin-top: 20px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 13px;
-      font-weight: 800;
-      color: #333;
-      margin-bottom: 6px;
-    }
-
-    .field input {
-      width: 100%;
-      box-sizing: border-box; /* Ensures padding doesn't break the width */
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      outline: none;
-      font-size: 14px;
-      background: #fff;
-    }
-
-    .field input:focus {
-      border-color: #B39DDB;
-      box-shadow: 0 0 0 3px rgba(179,157,219,0.25);
+      text-align: center;
     }
 
     .btn-row {
       display: flex;
-      flex-direction: column; /* Stack buttons for a cleaner mobile-friendly look */
+      flex-direction: column;
       gap: 12px;
-      margin-top: 20px;
+      margin-top: 24px;
     }
 
     .btn {
@@ -139,7 +107,11 @@
       z-index: 9999;
       border: 1px solid rgba(179,157,219,0.7);
     }
-    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 
@@ -164,28 +136,19 @@
     <div class="login-wrap">
       <div class="login-grid">
         <section class="panel" aria-label="Login form">
-          <h2>Sign in</h2>
+          <h2>Secure Staff Sign In</h2>
           <div class="muted">
-            <span class="badge-pill">Demo Mode</span>
-            <p>Authorized personnel only.</p>
+            <span class="badge-pill">Cognito Hosted Login</span>
+            <p>Employees and owners only.</p>
+            <p style="margin-top: 12px;">
+              Click below to sign in through the secure staff portal.
+            </p>
           </div>
 
-          <form id="loginForm" autocomplete="on">
-            <div class="form-grid">
-              <div class="field">
-                <label for="email">Email / Username</label>
-                <input id="email" name="email" type="text" required placeholder="staff@cheatday.com" />
-              </div>
-
-              <div class="field">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password" required placeholder="••••••••" />
-              </div>
-            </div>
-
+          <form id="loginForm" autocomplete="off">
             <div class="btn-row">
-              <button class="btn btn-primary" type="submit">Login</button>
-              <button class="btn btn-secondary" id="demoFill" type="button">Use Demo Login</button>
+              <button class="btn btn-primary" type="submit">Continue to Secure Login</button>
+              <button class="btn btn-secondary" id="forceLogout" type="button">Sign Out of Current Session</button>
             </div>
           </form>
         </section>
@@ -210,66 +173,113 @@
   <div id="toast" class="toast">Saved!</div>
 
   <script>
-    /************ Cart badge ************/
     const CART_KEY = "cheatday_cart";
-    function getCart() { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
-    function cartCount() { return getCart().reduce((sum, line) => sum + (line.qty || 0), 0); }
+    let toastTimer = null;
+
+    function getCart() {
+      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    }
+
+    function cartCount() {
+      return getCart().reduce((sum, line) => sum + (line.qty || 0), 0);
+    }
+
     function updateCartCount() {
       const el = document.getElementById("cartCount");
       if (el) el.textContent = cartCount();
     }
-    updateCartCount();
-    window.addEventListener("storage", (e) => { if (e.key === CART_KEY) updateCartCount(); });
 
-    /************ Demo login ************/
-    const AUTH_KEY = "cheatday_auth_demo";
-
-    let toastTimer = null;
     function showToast(msg) {
       const t = document.getElementById("toast");
       t.textContent = msg;
       t.classList.add("show");
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove("show"), 1400);
+      toastTimer = setTimeout(() => t.classList.remove("show"), 1600);
     }
 
-    function saveDemoSession(email) {
-      localStorage.setItem(AUTH_KEY, JSON.stringify({
-        email,
-        loginAt: new Date().toISOString()
-      }));
+    function clearTokens() {
+      localStorage.removeItem("cheatday_id_token");
+      localStorage.removeItem("cheatday_access_token");
+      localStorage.removeItem("cheatday_refresh_token");
     }
 
-    function handleLogin(email, password) {
-      const e = email.toLowerCase();
-      if (e === "owner@cheatday.com" && password === "owner123") return "owner";
-      if (e === "employee@cheatday.com" && password === "employee123") return "employee";
-      return null;
+    function randomString(length = 64) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+      const arr = new Uint8Array(length);
+      crypto.getRandomValues(arr);
+      return Array.from(arr, x => chars[x % chars.length]).join("");
     }
 
-    document.getElementById("demoFill").addEventListener("click", () => {
-      document.getElementById("email").value = "employee@cheatday.com";
-      document.getElementById("password").value = "employee123";
-      showToast("Demo login filled");
-    });
+    async function sha256Base64Url(str) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      const digest = await crypto.subtle.digest("SHA-256", data);
+      const bytes = new Uint8Array(digest);
 
-    document.getElementById("loginForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+      let binary = "";
+      bytes.forEach(b => {
+        binary += String.fromCharCode(b);
+      });
 
-      const type = handleLogin(email, password);
-      if (!type) {
-        showToast("Invalid login. Try demo credentials.");
+      return btoa(binary)
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+    }
+
+    async function startCognitoLogin() {
+      if (!window.AUTH_CONFIG) {
+        alert("auth-config.js did not load.");
         return;
       }
 
-      saveDemoSession(email);
-      showToast("Logged in!");
+      const verifier = randomString(64);
+      const challenge = await sha256Base64Url(verifier);
+      const state = crypto.randomUUID();
 
-      // Redirect logic
-      if (type === "owner") window.location.href = "staff-dashboard.html";
-      else window.location.href = "staff-orders.html";
+      sessionStorage.clear();
+      sessionStorage.setItem("pkce_verifier", verifier);
+      sessionStorage.setItem("oauth_state", state);
+
+      const params = new URLSearchParams({
+        response_type: "code",
+        client_id: AUTH_CONFIG.clientId,
+        redirect_uri: AUTH_CONFIG.redirectUri,
+        scope: "openid",
+        code_challenge_method: "S256",
+        code_challenge: challenge,
+        state: state,
+        prompt: "login"
+      });
+
+      window.location.href = `${AUTH_CONFIG.cognitoDomain}/oauth2/authorize?${params.toString()}`;
+    }
+
+    function signOutOfHostedSession() {
+      clearTokens();
+      sessionStorage.clear();
+
+      const params = new URLSearchParams({
+        client_id: AUTH_CONFIG.clientId,
+        logout_uri: AUTH_CONFIG.logoutUri
+      });
+
+      window.location.href = `${AUTH_CONFIG.cognitoDomain}/logout?${params.toString()}`;
+    }
+
+    updateCartCount();
+    window.addEventListener("storage", (e) => {
+      if (e.key === CART_KEY) updateCartCount();
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      showToast("Redirecting to secure login...");
+      await startCognitoLogin();
+    });
+
+    document.getElementById("forceLogout").addEventListener("click", () => {
+      signOutOfHostedSession();
     });
   </script>
 </body>

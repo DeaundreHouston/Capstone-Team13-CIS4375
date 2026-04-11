@@ -5,7 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Management | Cheat Day Catering</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="auth-config.js"></script>
+
   <style>
+    html {
+      visibility: hidden;
+    }
+
     .page-heading {
       max-width: 1200px;
       margin: 0 auto 24px;
@@ -83,9 +89,8 @@
       gap: 18px;
     }
 
-    /* FIXED CSS: No red lines, dynamic height, and site-matching color */
     .order-card {
-      background-color: #FFFACD; 
+      background-color: #FFFACD;
       border: 1px solid #e6db74;
       border-radius: 18px;
       padding: 22px;
@@ -93,7 +98,7 @@
       flex-direction: column;
       gap: 16px;
       box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-      height: auto; 
+      height: auto;
       min-height: 200px;
     }
 
@@ -142,7 +147,6 @@
       border: 1px solid transparent;
     }
 
-    /* Status Colors */
     .status-pending { background: rgba(255, 228, 181, 0.8); border-color: #f3d88b; }
     .status-confirmed { background: rgba(183, 168, 221, 0.4); border-color: #b39ddb; }
     .status-in-prep { background: rgba(135, 206, 250, 0.4); border-color: #87cefa; }
@@ -180,9 +184,20 @@
       display: none;
       z-index: 1000;
     }
-    #toast.show { display: block; }
+
+    #toast.show {
+      display: block;
+    }
+
+    #loggedInUser {
+  margin-left: 8px;
+  color: #fff;
+  background: #333;
+  border-color: #333;
+}
   </style>
 </head>
+
 <body>
   <header>
     <a href="index.html" class="logo">
@@ -195,7 +210,9 @@
         Cart <span id="cartCount" class="cart-badge">0</span>
       </a>
       <a href="staff_login.html">Staff Login</a>
-      <a href="owner_page.html">Owner Metrics</a>
+      <a href="#" id="signOutLink">Sign Out</a>
+      <span id="loggedInUser" class="pill" style="display:none;"></span>
+      <a href="owner_page.html" id="ownerMetricsLink" style="display:none;">Owner Metrics</a>
     </nav>
   </header>
 
@@ -251,12 +268,28 @@
     </div>
   </footer>
 
-  <div id="toast" class="toast">Saved!</div>
+  <div id="toast">Saved!</div>
 
   <script>
     const API_BASE_URL = "https://1p13n3k8d5.execute-api.us-east-1.amazonaws.com/test";
+    const CART_KEY = "cheatday_cart";
     let orders = [];
     let toastTimer = null;
+
+    function getCart() {
+      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    }
+
+    function cartCount() {
+      return getCart().reduce((sum, line) => sum + (line.qty || 0), 0);
+    }
+
+    function updateCartCount() {
+      const el = document.getElementById("cartCount");
+      if (el) {
+        el.textContent = cartCount();
+      }
+    }
 
     function showToast(message) {
       const toast = document.getElementById("toast");
@@ -266,25 +299,230 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 2000);
     }
 
-    async function loadOrders() {
-      const url = `${API_BASE_URL}/staff/orders`; 
+    function parseJwt(token) {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
+      return JSON.parse(atob(padded));
+    }
+
+    function getUserInfoFromToken() {
+      const idToken = localStorage.getItem("cheatday_id_token");
+      if (!idToken) return null;
+
       try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        if (data && data.orders) {
-            orders = data.orders.map(o => ({
-                id: o.Order_ID,
-                customer: `${o.First_name} ${o.Last_name}`,
-                phone: o.Phone || "No Phone Provided", // Mapping Phone field
-                total: parseFloat(o.Total_amount || 0),
-                status: o.status,
-                placed: new Date(o.Order_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                items: o.items || ["No items listed"] // This will work once SQL JOIN is added
-            }));
-        } else {
-            orders = [];
+        const claims = parseJwt(idToken);
+        const groups = claims["cognito:groups"] || [];
+
+        const name =
+          claims.email ||
+          claims["cognito:username"] ||
+          claims.sub ||
+          "Unknown user";
+
+        const role = groups.includes(AUTH_CONFIG.ownerGroup)
+          ? "Owner"
+          : groups.includes(AUTH_CONFIG.employeeGroup)
+          ? "Employee"
+          : "User";
+
+        return { name, role };
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function showLoggedInUser() {
+      const el = document.getElementById("loggedInUser");
+      if (!el) return;
+
+      const user = getUserInfoFromToken();
+      if (!user) return;
+
+      el.textContent = `Logged in as: ${user.name} (${user.role})`;
+      el.style.display = "inline-block";
+    }
+
+    function clearTokens() {
+      localStorage.removeItem("cheatday_id_token");
+      localStorage.removeItem("cheatday_access_token");
+      localStorage.removeItem("cheatday_refresh_token");
+    }
+
+    function signOutHostedSession() {
+      clearTokens();
+      sessionStorage.clear();
+
+      const params = new URLSearchParams({
+        client_id: AUTH_CONFIG.clientId,
+        logout_uri: AUTH_CONFIG.logoutUri
+      });
+
+      window.location.href = `${AUTH_CONFIG.cognitoDomain}/logout?${params.toString()}`;
+    }
+
+    function redirectToLogin(message) {
+      if (message) {
+        alert(message);
+      }
+      clearTokens();
+      sessionStorage.clear();
+      window.location.replace("staff_login.html");
+    }
+
+    async function exchangeCodeForTokens(code) {
+      if (!window.AUTH_CONFIG) {
+        throw new Error("auth-config.js did not load.");
+      }
+
+      const verifier = sessionStorage.getItem("pkce_verifier");
+      if (!verifier) {
+        throw new Error("Missing PKCE verifier. Start from staff_login.html again.");
+      }
+
+      const body = new URLSearchParams({
+        grant_type: "authorization_code",
+        client_id: AUTH_CONFIG.clientId,
+        code: code,
+        redirect_uri: AUTH_CONFIG.redirectUri,
+        code_verifier: verifier
+      });
+
+      const response = await fetch(`${AUTH_CONFIG.cognitoDomain}/oauth2/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: body.toString()
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error("Token exchange failed: " + text);
+      }
+
+      return response.json();
+    }
+
+    async function handleOAuthCallbackIfPresent() {
+      const params = new URLSearchParams(window.location.search);
+
+      const oauthError = params.get("error");
+      if (oauthError) {
+        const description = params.get("error_description") || oauthError;
+        throw new Error(description);
+      }
+
+      const code = params.get("code");
+      if (!code) {
+        return;
+      }
+
+      const state = params.get("state");
+      const savedState = sessionStorage.getItem("oauth_state");
+
+      if (!state || !savedState || state !== savedState) {
+        throw new Error("Invalid OAuth state.");
+      }
+
+      const tokens = await exchangeCodeForTokens(code);
+
+      localStorage.setItem("cheatday_id_token", tokens.id_token);
+      localStorage.setItem("cheatday_access_token", tokens.access_token);
+
+      if (tokens.refresh_token) {
+        localStorage.setItem("cheatday_refresh_token", tokens.refresh_token);
+      }
+
+      sessionStorage.removeItem("pkce_verifier");
+      sessionStorage.removeItem("oauth_state");
+
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    function requireStaffAccess() {
+      const idToken = localStorage.getItem("cheatday_id_token");
+      if (!idToken) {
+        redirectToLogin("Please sign in first.");
+        return false;
+      }
+
+      let claims;
+      try {
+        claims = parseJwt(idToken);
+      } catch (err) {
+        redirectToLogin("Your login session is invalid.");
+        return false;
+      }
+
+      if (!claims.exp || claims.exp * 1000 <= Date.now()) {
+        redirectToLogin("Your session expired. Please log in again.");
+        return false;
+      }
+
+      const groups = claims["cognito:groups"] || [];
+      const allowed =
+        groups.includes(AUTH_CONFIG.employeeGroup) ||
+        groups.includes(AUTH_CONFIG.ownerGroup);
+
+      if (!allowed) {
+        signOutHostedSession();
+        return false;
+      }
+
+      const ownerLink = document.getElementById("ownerMetricsLink");
+      if (groups.includes(AUTH_CONFIG.ownerGroup) && ownerLink) {
+        ownerLink.style.display = "";
+      }
+
+      document.documentElement.style.visibility = "visible";
+      return true;
+    }
+
+    function getAuthHeaders() {
+      const accessToken = localStorage.getItem("cheatday_access_token");
+      const headers = {
+        "Content-Type": "application/json"
+      };
+
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+
+      return headers;
+    }
+
+    async function loadOrders() {
+      const url = `${API_BASE_URL}/staff/orders`;
+
+      try {
+        const response = await fetch(url, {
+          headers: getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          throw new Error(`Orders request failed: ${response.status}`);
         }
+
+        const data = await response.json();
+
+        if (data && data.orders) {
+          orders = data.orders.map(o => ({
+            id: o.Order_ID,
+            customer: `${o.First_name} ${o.Last_name}`,
+            phone: o.Phone || "No Phone Provided",
+            total: parseFloat(o.Total_amount || 0),
+            status: o.status,
+            placed: new Date(o.Order_date).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit"
+            }),
+            items: o.items || []
+          }));
+        } else {
+          orders = [];
+        }
+
         updateSummary();
         renderOrders();
       } catch (err) {
@@ -297,16 +535,18 @@
       try {
         const response = await fetch(`${API_BASE_URL}/staff/orders/${orderId}/status`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: getAuthHeaders(),
           body: JSON.stringify({ status: nextStatus })
         });
+
         if (response.ok) {
           showToast(`Order #${orderId} updated to ${nextStatus}`);
-          loadOrders(); 
+          loadOrders();
         } else {
           showToast("Update failed");
         }
       } catch (err) {
+        console.error(err);
         showToast("Network error.");
       }
     }
@@ -336,15 +576,17 @@
         acc[o.status] = (acc[o.status] || 0) + 1;
         return acc;
       }, {});
+
       document.getElementById("summaryTotal").textContent = orders.length;
-      document.getElementById("summaryIncoming").textContent = (counts["Pending"] || 0) + (counts["Confirmed"] || 0);
+      document.getElementById("summaryIncoming").textContent =
+        (counts["Pending"] || 0) + (counts["Confirmed"] || 0);
       document.getElementById("summaryInPrep").textContent = counts["In Prep"] || 0;
       document.getElementById("summaryReady").textContent = counts["Ready"] || 0;
     }
 
     function renderOrders() {
       const container = document.getElementById("ordersList");
-      const filter = document.getElementById("statusFilter").value; 
+      const filter = document.getElementById("statusFilter").value;
       container.innerHTML = "";
 
       const filteredOrders = orders.filter(o => filter === "all" || o.status === filter);
@@ -358,8 +600,15 @@
         const action = getNextAction(order.status);
         const card = document.createElement("section");
         card.className = "order-card";
-        
-        // NEW card structure: Includes Customer Phone and Dynamic Items List
+
+        const itemsMarkup = (order.items && order.items.length)
+          ? order.items.map(item => `
+              <li>
+                <strong>${item.Quantity || 1}x</strong> ${item.Product_name || "Unknown Item"}
+              </li>
+            `).join("")
+          : `<li>No items listed</li>`;
+
         card.innerHTML = `
           <div class="order-card-header">
             <div>
@@ -373,15 +622,13 @@
           </div>
 
           <div class="order-items-section">
-  <div style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: #888; text-align: center; letter-spacing: 1px;">Items</div>
-  <ul class="order-items-list">
-    ${order.items.map(item => `
-      <li>
-        <strong>${item.Quantity || 1}x</strong> ${item.Product_name || "Unknown Item"}
-      </li>
-    `).join('')}
-  </ul>
-</div>
+            <div style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; color: #888; text-align: center; letter-spacing: 1px;">
+              Items
+            </div>
+            <ul class="order-items-list">
+              ${itemsMarkup}
+            </ul>
+          </div>
 
           <div class="order-footer">
             <div>
@@ -393,6 +640,7 @@
         `;
 
         const actionsContainer = card.querySelector(".order-actions");
+
         if (action) {
           const btn = document.createElement("button");
           btn.className = `btn ${action.style}`;
@@ -408,12 +656,40 @@
           cancelBtn.onclick = () => changeStatus(order.id, "Canceled");
           actionsContainer.appendChild(cancelBtn);
         }
+
         container.appendChild(card);
       });
     }
 
-    document.getElementById("statusFilter").addEventListener("change", renderOrders);
-    loadOrders();
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        updateCartCount();
+        window.addEventListener("storage", (e) => {
+          if (e.key === CART_KEY) updateCartCount();
+        });
+
+        document.getElementById("signOutLink").addEventListener("click", (e) => {
+          e.preventDefault();
+          signOutHostedSession();
+        });
+
+        await handleOAuthCallbackIfPresent();
+
+        const allowed = requireStaffAccess();
+        if (!allowed) {
+          return;
+        }
+
+        showLoggedInUser();
+
+        document.getElementById("statusFilter").addEventListener("change", renderOrders);
+        await loadOrders();
+      } catch (err) {
+        console.error("Auth error:", err);
+        alert(err.message || "Authentication failed.");
+        redirectToLogin();
+      }
+    });
   </script>
 </body>
 </html>

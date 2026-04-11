@@ -4,58 +4,134 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Owner Metrics | Cheat Day Catering</title>
+
   <link rel="stylesheet" href="style.css" />
+  <script src="auth-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    .metrics-wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 30px; text-align: left; }
-    .metrics-subtitle { margin: 10px 0 0; color: #333; font-weight: 600; }
-    
-    /* Row 1: The Revenue Grid */
-    .metrics-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-      gap: 18px; 
-      margin: 10px auto 20px; 
+    html {
+      visibility: hidden;
     }
 
-    /* Row 2: The Insights Grid */
+    .metrics-wrap { max-width: 1200px; margin: 0 auto; padding: 0 20px 30px; text-align: left; }
+    .metrics-subtitle { margin: 10px 0 0; color: #333; font-weight: 600; }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin: 10px auto 20px;
+    }
+
     .insights-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 18px;
       margin-bottom: 25px;
     }
-    
+
     .metric-label { margin: 0; font-size: 14px; color: #333; font-weight: 800; }
     .metric-value { margin-top: 10px; font-size: 1.8rem; font-weight: 900; color: #333; line-height: 1.1; }
-    
-    .panel { background-color: #FFFACD; border: 1px solid #ddd; border-radius: 12px; padding: 18px; box-shadow: 0 4px 8px rgba(0,0,0,0.10); margin-bottom: 18px; }
-    .panel-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+
+    .panel {
+      background-color: #FFFACD;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.10);
+      margin-bottom: 18px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
     .panel h2 { margin: 0; color: #333; font-size: 1.2rem; }
     .muted { color: #666; font-size: 0.95rem; margin: 8px 0 0; font-weight: 600; }
-    
-    /* Popularity Bars */
-    .popularity-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 15px; }
+
+    .popularity-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-top: 15px;
+    }
+
     .rank-list { list-style: none; padding: 0; margin: 0; }
     .rank-item { margin-bottom: 15px; }
-    .rank-info { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.9rem; margin-bottom: 5px; }
-    .bar-bg { background: rgba(0,0,0,0.05); height: 10px; border-radius: 5px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 5px; }
-    .top-bar { background: #4CAF50; } 
-    .bottom-bar { background: #e07a7a; } 
+    .rank-info {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
 
-    /* Table Styles */
-    .table-wrap { overflow-x: auto; background: #fff; border-radius: 12px; border: 1px solid #eee; }
+    .bar-bg {
+      background: rgba(0,0,0,0.05);
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .bar-fill { height: 100%; border-radius: 5px; }
+    .top-bar { background: #4CAF50; }
+    .bottom-bar { background: #e07a7a; }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #eee;
+    }
+
     table { width: 100%; border-collapse: collapse; min-width: 650px; }
-    th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; color: #333; }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      color: #333;
+    }
+
     th { background: rgba(179, 157, 219, 0.20); font-weight: 900; }
-    .pill { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; background: rgba(179, 157, 219, 0.25); border: 1px solid rgba(179, 157, 219, 0.65); color: #333; }
-    .status-pill { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; border: 1px solid transparent; color: #333; }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(179, 157, 219, 0.25);
+      border: 1px solid rgba(179, 157, 219, 0.65);
+      color: #333;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid transparent;
+      color: #333;
+    }
+
     .st-pending { background: rgba(255, 228, 181, 0.8); border-color: #f3d88b; }
     .st-ready { background: rgba(168, 255, 202, 0.8); border-color: #7bd8a9; }
     .st-completed { background: rgba(210, 210, 210, 0.4); border-color: #bbb; }
     .st-canceled { background: rgba(255, 180, 180, 0.8); border-color: #e07a7a; }
+
+    #loggedInUser {
+  margin-left: 8px;
+  color: #fff;
+  background: #333;
+  border-color: #333;
+}
   </style>
 </head>
 
@@ -69,6 +145,8 @@
       <a href="menu.html">Menu</a>
       <a href="staff-orders.html">Staff Orders</a>
       <a href="owner-page.html" class="active">Owner Metrics</a>
+      <a href="#" id="signOutLink">Sign Out</a>
+      <span id="loggedInUser" class="pill" style="display:none;"></span>
     </nav>
   </header>
 
@@ -79,7 +157,7 @@
 
     <section class="dashboard-section">
       <div class="metrics-wrap">
-        
+
         <div class="metrics-grid">
           <div class="item-tile"><p class="metric-label">Today</p><div class="metric-value" id="mToday">$0.00</div></div>
           <div class="item-tile"><p class="metric-label">This Month</p><div class="metric-value" id="mMonth">$0.00</div></div>
@@ -93,7 +171,7 @@
             <div class="metric-value" id="mAvg">$0.00</div>
             <p id="mOrderCount" style="margin-top: 8px; font-size: 0.85rem; color: #777; font-weight: 600;">Based on 0 orders</p>
           </div>
-          </div>
+        </div>
 
         <div class="panel">
           <div class="panel-head">
@@ -149,6 +227,116 @@
   <script>
     const API_URL = "https://1p13n3k8d5.execute-api.us-east-1.amazonaws.com/test/owner/metrics/revenue";
 
+    function parseJwt(token) {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, "=");
+      return JSON.parse(atob(padded));
+    }
+
+    function getUserInfoFromToken() {
+      const idToken = localStorage.getItem("cheatday_id_token");
+      if (!idToken) return null;
+
+      try {
+        const claims = parseJwt(idToken);
+        const groups = claims["cognito:groups"] || [];
+
+        const name =
+          claims.email ||
+          claims["cognito:username"] ||
+          claims.sub ||
+          "Unknown user";
+
+        const role = groups.includes(AUTH_CONFIG.ownerGroup) ? "Owner" : "User";
+
+        return { name, role };
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function showLoggedInUser() {
+      const el = document.getElementById("loggedInUser");
+      if (!el) return;
+
+      const user = getUserInfoFromToken();
+      if (!user) return;
+
+      el.textContent = `Logged in as: ${user.name} (${user.role})`;
+      el.style.display = "inline-block";
+    }
+
+    function clearTokens() {
+      localStorage.removeItem("cheatday_id_token");
+      localStorage.removeItem("cheatday_access_token");
+      localStorage.removeItem("cheatday_refresh_token");
+    }
+
+    function signOutHostedSession() {
+      clearTokens();
+      sessionStorage.clear();
+
+      const params = new URLSearchParams({
+        client_id: AUTH_CONFIG.clientId,
+        logout_uri: AUTH_CONFIG.logoutUri
+      });
+
+      window.location.href = `${AUTH_CONFIG.cognitoDomain}/logout?${params.toString()}`;
+    }
+
+    function redirectToStaffOrders(message) {
+      if (message) {
+        alert(message);
+      }
+      window.location.replace("staff-orders.html");
+    }
+
+    function requireOwnerAccess() {
+      const idToken = localStorage.getItem("cheatday_id_token");
+      if (!idToken) {
+        window.location.replace("staff_login.html");
+        return false;
+      }
+
+      let claims;
+      try {
+        claims = parseJwt(idToken);
+      } catch (err) {
+        signOutHostedSession();
+        return false;
+      }
+
+      if (!claims.exp || claims.exp * 1000 <= Date.now()) {
+        signOutHostedSession();
+        return false;
+      }
+
+      const groups = claims["cognito:groups"] || [];
+      const isOwner = groups.includes(AUTH_CONFIG.ownerGroup);
+
+      if (!isOwner) {
+        redirectToStaffOrders("Only the owner can access this page.");
+        return false;
+      }
+
+      document.documentElement.style.visibility = "visible";
+      return true;
+    }
+
+    function getAuthHeaders() {
+      const accessToken = localStorage.getItem("cheatday_access_token");
+      const headers = {
+        "Content-Type": "application/json"
+      };
+
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+
+      return headers;
+    }
+
     const money = (n) => Number(n || 0).toLocaleString(undefined, { style: "currency", currency: "USD" });
     const fmtDate = (v) => v ? new Date(v).toLocaleString() : "";
     const statusClass = (s) => `st-${String(s || "").toLowerCase().replace(" ", "")}`;
@@ -158,7 +346,7 @@
       const botContainer = document.getElementById("bottomItemsList");
 
       const buildBar = (item, type) => {
-        const width = Math.min((item.total_sold / 10) * 100, 100); 
+        const width = Math.min((item.total_sold / 10) * 100, 100);
         return `
           <div class="rank-item">
             <div class="rank-info">
@@ -172,63 +360,92 @@
         `;
       };
 
-      topContainer.innerHTML = top3.length ? top3.map(i => buildBar(i, 'top')).join('') : "No data";
-      botContainer.innerHTML = bottom3.length ? bottom3.map(i => buildBar(i, 'bottom')).join('') : "No data";
-    }
-
-    async function refresh() {
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        
-        // Revenue Totals
-        document.getElementById("mToday").textContent = money(data.summary?.today);
-        document.getElementById("mMonth").textContent = money(data.summary?.month);
-        document.getElementById("mQuarter").textContent = money(data.summary?.quarter);
-        document.getElementById("mAll").textContent = money(data.summary?.allTime);
-
-        // Insights Row
-        document.getElementById("mAvg").textContent = money(data.summary?.avgOrderValue);
-        const totalOrders = data.summary?.totalOrderCount || 0;
-        document.getElementById("mOrderCount").textContent = `Based on ${totalOrders} total orders`;
-
-        // Table
-        const body = document.getElementById("ordersBody");
-        const list = data.recentOrders || [];
-        document.getElementById("orderCount").textContent = `${list.length} orders`;
-        body.innerHTML = list.map(o => `
-          <tr>
-            <td>${o.Order_ID}</td>
-            <td>${fmtDate(o.Order_date)}</td>
-            <td>${money(o.Total_amount)}</td>
-            <td><span class="status-pill ${statusClass(o.status)}">${o.status}</span></td>
-          </tr>
-        `).join("");
-
-        renderPopularity(data.top3 || [], data.bottom3 || []);
-        renderChart(list);
-
-      } catch (err) {
-        console.error("Refresh Error:", err);
-      }
+      topContainer.innerHTML = top3.length ? top3.map(i => buildBar(i, "top")).join("") : "No data";
+      botContainer.innerHTML = bottom3.length ? bottom3.map(i => buildBar(i, "bottom")).join("") : "No data";
     }
 
     let chart = null;
     function renderChart(list) {
       const ctx = document.getElementById("revChart").getContext("2d");
       if (chart) chart.destroy();
+
       chart = new Chart(ctx, {
         type: "bar",
         data: {
           labels: list.map(o => `#${o.Order_ID}`).reverse(),
-          datasets: [{ label: "Order Total ($)", data: list.map(o => o.Total_amount).reverse(), backgroundColor: '#b39ddb' }]
+          datasets: [{
+            label: "Order Total ($)",
+            data: list.map(o => o.Total_amount).reverse(),
+            backgroundColor: "#b39ddb"
+          }]
         },
-        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
       });
     }
 
-    document.getElementById("refreshBtn").addEventListener("click", refresh);
-    refresh();
+    async function refresh() {
+      try {
+        const res = await fetch(API_URL, {
+          headers: getAuthHeaders()
+        });
+
+        if (!res.ok) {
+          throw new Error(`Metrics request failed: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        document.getElementById("mToday").textContent = money(data.summary?.today);
+        document.getElementById("mMonth").textContent = money(data.summary?.month);
+        document.getElementById("mQuarter").textContent = money(data.summary?.quarter);
+        document.getElementById("mAll").textContent = money(data.summary?.allTime);
+
+        document.getElementById("mAvg").textContent = money(data.summary?.avgOrderValue);
+        const totalOrders = data.summary?.totalOrderCount || 0;
+        document.getElementById("mOrderCount").textContent = `Based on ${totalOrders} total orders`;
+
+        const body = document.getElementById("ordersBody");
+        const list = data.recentOrders || [];
+        document.getElementById("orderCount").textContent = `${list.length} orders`;
+
+        body.innerHTML = list.length
+          ? list.map(o => `
+              <tr>
+                <td>${o.Order_ID}</td>
+                <td>${fmtDate(o.Order_date)}</td>
+                <td>${money(o.Total_amount)}</td>
+                <td><span class="status-pill ${statusClass(o.status)}">${o.status}</span></td>
+              </tr>
+            `).join("")
+          : `<tr><td colspan="4">No recent orders found.</td></tr>`;
+
+        renderPopularity(data.top3 || [], data.bottom3 || []);
+        renderChart(list);
+      } catch (err) {
+        console.error("Refresh Error:", err);
+        alert("Could not load owner metrics.");
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const ok = requireOwnerAccess();
+      if (!ok) return;
+
+      showLoggedInUser();
+
+      document.getElementById("signOutLink").addEventListener("click", (e) => {
+        e.preventDefault();
+        signOutHostedSession();
+      });
+
+      document.getElementById("refreshBtn").addEventListener("click", refresh);
+      await refresh();
+    });
   </script>
 </body>
 </html>
