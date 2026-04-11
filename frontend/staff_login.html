@@ -9,109 +9,20 @@
   <script src="auth-config.js"></script>
 
   <style>
-    .login-wrap {
-      max-width: 500px;
-      margin: 60px auto;
-      padding: 0 20px;
-    }
-
-    .login-grid {
-      display: flex;
-      justify-content: center;
-    }
-
-    .panel {
-      background: #FFFACD;
-      border: 1px solid #ddd;
-      border-radius: 14px;
-      padding: 30px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-      width: 100%;
-    }
-
-    .panel h2 {
-      margin: 0 0 15px;
-      color: #333;
-      text-align: center;
-    }
-
-    .muted {
-      color: #666;
-      font-size: 14px;
-      line-height: 1.45;
-      text-align: center;
-    }
-
-    .btn-row {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .btn {
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-weight: 900;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.15s ease;
-    }
-
-    .btn-primary {
-      background: #333;
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: #9575CD;
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: #fff;
-      color: #333;
-      border: 1px solid #ddd;
-    }
-
-    .btn-secondary:hover {
-      border-color: #B39DDB;
-    }
-
-    .badge-pill {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(179,157,219,0.25);
-      border: 1px solid rgba(179,157,219,0.5);
-      color: #333;
-      font-weight: 900;
-      font-size: 12px;
-      margin-bottom: 8px;
-    }
-
-    .toast {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      background: #333;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 12px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      pointer-events: none;
-      font-size: 0.95rem;
-      z-index: 9999;
-      border: 1px solid rgba(179,157,219,0.7);
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .login-wrap { max-width: 500px; margin: 60px auto; padding: 0 20px; }
+    .login-grid { display: flex; justify-content: center; }
+    .panel { background: #FFFACD; border: 1px solid #ddd; border-radius: 14px; padding: 30px; box-shadow: 0 6px 20px rgba(0,0,0,0.15); width: 100%; }
+    .panel h2 { margin: 0 0 15px; color: #333; text-align: center; }
+    .muted { color: #666; font-size: 14px; line-height: 1.45; text-align: center; }
+    .btn-row { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .btn { padding: 14px; border: none; border-radius: 12px; font-weight: 900; cursor: pointer; transition: background 0.2s ease, transform 0.15s ease; }
+    .btn-primary { background: #333; color: #fff; }
+    .btn-primary:hover { background: #9575CD; transform: translateY(-1px); }
+    .btn-secondary { background: #fff; color: #333; border: 1px solid #ddd; }
+    .btn-secondary:hover { border-color: #B39DDB; }
+    .badge-pill { display: inline-block; padding: 4px 10px; border-radius: 999px; background: rgba(179,157,219,0.25); border: 1px solid rgba(179,157,219,0.5); color: #333; font-weight: 900; font-size: 12px; margin-bottom: 8px; }
+    .toast { position: fixed; right: 16px; bottom: 16px; background: #333; color: #fff; padding: 10px 14px; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); opacity: 0; transform: translateY(10px); transition: opacity 0.2s ease, transform 0.2s ease; pointer-events: none; font-size: 0.95rem; z-index: 9999; border: 1px solid rgba(179,157,219,0.7); }
+    .toast.show { opacity: 1; transform: translateY(0); }
   </style>
 </head>
 
@@ -126,7 +37,7 @@
       <a href="cart.html" class="cart-link">
         Cart <span id="cartCount" class="cart-badge">0</span>
       </a>
-      <a href="staff_login.html">Staff Login</a>
+      <a href="staff_login.html" class="active">Staff Login</a>
     </nav>
   </header>
 
@@ -140,9 +51,7 @@
           <div class="muted">
             <span class="badge-pill">Cognito Hosted Login</span>
             <p>Employees and owners only.</p>
-            <p style="margin-top: 12px;">
-              Click below to sign in through the secure staff portal.
-            </p>
+            <p style="margin-top: 12px;">Click below to sign in through the secure staff portal.</p>
           </div>
 
           <form id="loginForm" autocomplete="off">
@@ -162,7 +71,6 @@
         <h3>Contact Us</h3>
         <p>Phone: (210) 722-0119</p>
       </div>
-
       <div class="footer-column">
         <h3>Follow Us</h3>
         <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
@@ -176,33 +84,7 @@
     const CART_KEY = "cheatday_cart";
     let toastTimer = null;
 
-    function getCart() {
-      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-    }
-
-    function cartCount() {
-      return getCart().reduce((sum, line) => sum + (line.qty || 0), 0);
-    }
-
-    function updateCartCount() {
-      const el = document.getElementById("cartCount");
-      if (el) el.textContent = cartCount();
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById("toast");
-      t.textContent = msg;
-      t.classList.add("show");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove("show"), 1600);
-    }
-
-    function clearTokens() {
-      localStorage.removeItem("cheatday_id_token");
-      localStorage.removeItem("cheatday_access_token");
-      localStorage.removeItem("cheatday_refresh_token");
-    }
-
+    // --- PKCE Helpers ---
     function randomString(length = 64) {
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
       const arr = new Uint8Array(length);
@@ -215,18 +97,12 @@
       const data = encoder.encode(str);
       const digest = await crypto.subtle.digest("SHA-256", data);
       const bytes = new Uint8Array(digest);
-
       let binary = "";
-      bytes.forEach(b => {
-        binary += String.fromCharCode(b);
-      });
-
-      return btoa(binary)
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
     }
 
+    // --- The Corrected Login Function ---
     async function startCognitoLogin() {
       if (!window.AUTH_CONFIG) {
         alert("auth-config.js did not load.");
@@ -237,40 +113,40 @@
       const challenge = await sha256Base64Url(verifier);
       const state = crypto.randomUUID();
 
-      sessionStorage.clear();
+      // IMPORTANT: Save verifier for the exchange on the next page
       sessionStorage.setItem("pkce_verifier", verifier);
       sessionStorage.setItem("oauth_state", state);
 
       const params = new URLSearchParams({
-        response_type: "code",
+        response_type: "code", // Matches 'Authorization code grant' in AWS
         client_id: AUTH_CONFIG.clientId,
         redirect_uri: AUTH_CONFIG.redirectUri,
-        scope: "openid",
+        scope: "openid email profile",
         code_challenge_method: "S256",
         code_challenge: challenge,
         state: state,
         prompt: "login"
       });
 
+      // Switching back to /oauth2/authorize for the Code flow
       window.location.href = `${AUTH_CONFIG.cognitoDomain}/oauth2/authorize?${params.toString()}`;
     }
 
-    function signOutOfHostedSession() {
-      clearTokens();
-      sessionStorage.clear();
-
-      const params = new URLSearchParams({
-        client_id: AUTH_CONFIG.clientId,
-        logout_uri: AUTH_CONFIG.logoutUri
-      });
-
-      window.location.href = `${AUTH_CONFIG.cognitoDomain}/logout?${params.toString()}`;
+    // --- UI Logic ---
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+      const count = cart.reduce((sum, line) => sum + (line.qty || 0), 0);
+      const el = document.getElementById("cartCount");
+      if (el) el.textContent = count;
     }
 
-    updateCartCount();
-    window.addEventListener("storage", (e) => {
-      if (e.key === CART_KEY) updateCartCount();
-    });
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove("show"), 1600);
+    }
 
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -279,8 +155,13 @@
     });
 
     document.getElementById("forceLogout").addEventListener("click", () => {
-      signOutOfHostedSession();
+      localStorage.clear();
+      sessionStorage.clear();
+      const params = new URLSearchParams({ client_id: AUTH_CONFIG.clientId, logout_uri: AUTH_CONFIG.logoutUri });
+      window.location.href = `${AUTH_CONFIG.cognitoDomain}/logout?${params.toString()}`;
     });
+
+    updateCartCount();
   </script>
 </body>
 </html>

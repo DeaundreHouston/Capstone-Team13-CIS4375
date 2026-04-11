@@ -1,4 +1,3 @@
-
 window.AUTH_CONFIG = {
   cognitoDomain: "https://us-east-1l91cmq2hb.auth.us-east-1.amazoncognito.com",
   clientId: "64an5cpadtqhe7kgf0ivgmc787",
