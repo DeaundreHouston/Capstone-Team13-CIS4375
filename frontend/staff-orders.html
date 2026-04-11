@@ -21,7 +21,9 @@
     
     .orders-list { max-width: 1200px; margin: 0 auto 40px; padding: 0 20px; display: grid; gap: 18px; }
     .order-card { background-color: #FFFACD; border: 1px solid #e6db74; border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); height: auto; min-height: 200px; }
-    .order-card-header { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px; }
+    .order-card-header { display: grid; grid-template-columns: 1fr 1fr 1fr; /* Three equal columns */gap: 16px; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 12px;}
+    .phone-display {text-align: center; font-weight: 700; color: #444; font-size: 1rem; letter-spacing: 0.5px}
+    .header-right { text-align: right;}
     
     .order-items-section { flex-grow: 1; padding: 10px 0; }
     .order-items-list { list-style: none; margin: 10px 0; padding: 0; color: #444; font-size: 0.95rem; }
@@ -243,39 +245,48 @@
     }
 
     function renderOrders() {
-      const container = document.getElementById("ordersList");
-      const filter = document.getElementById("statusFilter").value;
-      container.innerHTML = "";
-      const filtered = orders.filter(o => filter === "all" || o.status === filter);
+    const container = document.getElementById("ordersList");
+    const filter = document.getElementById("statusFilter").value;
+    container.innerHTML = "";
+    const filtered = orders.filter(o => filter === "all" || o.status === filter);
 
-      if (!filtered.length) {
+    if (!filtered.length) {
         container.innerHTML = `<div class="empty-state">No ${filter} orders found.</div>`;
         return;
-      }
+    }
 
-      filtered.forEach(order => {
+    filtered.forEach(order => {
         const card = document.createElement("div");
         card.className = "order-card";
         card.innerHTML = `
           <div class="order-card-header">
-            <div>
+            <div class="header-left">
               <strong>Order #${order.id}</strong>
               <div>${order.customer}</div>
             </div>
-            <span class="status-pill status-${order.status.toLowerCase().replace(" ", "-")}">${order.status}</span>
+
+            <div class="phone-display">
+              ${order.phone}
+            </div>
+
+            <div class="header-right">
+              <span class="status-pill status-${order.status.toLowerCase().replace(" ", "-")}">${order.status}</span>
+            </div>
           </div>
+
           <div class="order-items-section">
             <ul class="order-items-list">
               ${order.items.map(i => `<li>${i.Quantity}x ${i.Product_name}</li>`).join("")}
             </ul>
           </div>
+
           <div class="order-footer">
             <div><strong>$${order.total.toFixed(2)}</strong></div>
           </div>
         `;
         container.appendChild(card);
-      });
-    }
+    });
+}
 
     // --- 4. Initialization ---
     document.addEventListener("DOMContentLoaded", async () => {
