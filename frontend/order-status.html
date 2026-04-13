@@ -3,125 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cheat Day | Order Status</title>
+    <title>Order Status | Cheat Day</title>
     <style>
         :root {
-            --primary-color: #9575CD; /* Soft Purple */
-            --gray-light: #e0e0e0;    /* Unfinished Grey */
+            --primary-purple: #9575CD;
+            --gray-light: #e0e0e0;
             --gray-dark: #7f8c8d;
-            --text-main: #2f3542;
-            --progress-width: 0%;    /* DYNAMIC: Controlled by JS */
+            --text-dark: #2f3542;
+            --header-footer-bg: #333; /* Dark Dashboard Grey */
+            --container-bg: #FFFACD;    /* Cheat Day Cream/Yellow */
+            --progress-width: 0%;
         }
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f1f2f6;
+            background-color: #f1f2f6; /* Soft light background */
             margin: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
             min-height: 100vh;
         }
 
+        /* --- Simple Dashboard Header --- */
+        header {
+            background-color: var(--header-footer-bg);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .logo-img {
+            height: 110px;
+            display: block;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
         .container {
-            background: #FFFACD; /* Your Light Yellow Theme */
+            background: var(--container-bg);
             width: 100%;
-            max-width: 600px;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 650px;
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12);
         }
 
         h2 { 
             text-align: center; 
-            color: var(--text-main); 
-            margin-bottom: 30px; 
-            font-size: 28px; 
+            color: var(--text-dark); 
+            margin-bottom: 40px; 
+            font-size: 32px; 
             font-weight: 800;
         }
 
-        /* Progress Bar Styling */
+        /* --- Progress Bar --- */
         .status-bar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
             position: relative;
         }
 
-        /* THE DYNAMIC CONNECTING LINE */
         .status-bar::before {
             content: '';
             position: absolute;
-            top: 18px;
+            top: 20px;
             left: 0;
             right: 0;
-            height: 4px;
-            /* Linear gradient creates the "fill" effect */
+            height: 5px;
             background: linear-gradient(to right, 
-                var(--primary-color) var(--progress-width), 
+                var(--primary-purple) var(--progress-width), 
                 var(--gray-light) var(--progress-width)
             );
             z-index: 1;
-            transition: all 0.5s ease;
+            transition: all 0.6s ease;
         }
 
-        .status-step { 
-            text-align: center; 
-            z-index: 2; 
-            width: 25%; 
-        }
+        .status-step { text-align: center; z-index: 2; width: 25%; }
 
         .circle {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             background: var(--gray-light);
             border-radius: 50%;
-            margin: 0 auto 10px;
-            line-height: 40px;
+            margin: 0 auto 12px;
+            line-height: 45px;
             font-weight: bold;
             color: white;
             transition: all 0.4s ease;
             position: relative;
         }
 
-        .status-step p { 
-            margin: 0; 
-            font-size: 14px; 
-            color: var(--gray-dark); 
-            transition: color 0.4s ease;
-        }
+        .status-step p { margin: 0; font-size: 15px; color: var(--gray-dark); font-weight: 600; }
 
-        /* Purple Styling for Completed and Active steps */
         .status-step.active .circle, 
-        .status-step.completed .circle { 
-            background: var(--primary-color); 
-        }
+        .status-step.completed .circle { background: var(--primary-purple); }
 
         .status-step.active p, 
-        .status-step.completed p { 
-            color: var(--primary-color); 
-            font-weight: bold; 
-        }
+        .status-step.completed p { color: var(--primary-purple); }
 
-        /* Current step "Pop" */
         .status-step.active .circle {
             transform: scale(1.2);
-            box-shadow: 0 0 15px rgba(149, 117, 205, 0.4);
+            box-shadow: 0 0 20px rgba(149, 117, 205, 0.5);
         }
 
-        /* Receipt Section */
+        /* --- Receipt Section --- */
         #receipt {
-            border-top: 2px dashed var(--gray-light);
-            padding-top: 25px;
+            border-top: 2px dashed #d1ccc0;
+            padding-top: 30px;
             margin-top: 20px;
         }
 
         .receipt-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
-            color: var(--gray-dark);
-            font-size: 14px;
+            margin-bottom: 25px;
+            color: #57606f;
+            font-size: 15px;
         }
 
         .item-row {
@@ -129,56 +135,103 @@
             justify-content: space-between;
             margin-bottom: 12px;
             font-size: 16px;
-            color: var(--text-main);
+            color: var(--text-dark);
         }
 
         .total-row {
-            border-top: 2px solid var(--text-main);
-            padding-top: 15px;
-            margin-top: 15px;
+            border-top: 3px solid var(--text-dark);
+            padding-top: 20px;
+            margin-top: 20px;
             display: flex;
             justify-content: space-between;
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--text-main);
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-dark);
         }
 
-        .alert-canceled {
-            background-color: #ffeaa7;
-            color: #d35400;
-            padding: 10px;
-            border-radius: 10px;
+        /* --- Footer --- */
+        footer {
+            background-color: var(--header-footer-bg);
+            color: white;
+            padding: 40px 20px;
             text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-around;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-column {
+            flex: 1;
+            padding: 10px;
+        }
+
+        footer h3 { 
+            margin-bottom: 12px; 
+            font-size: 1.6rem; 
+            font-weight: 700;
+            color: #B39DDB;
+        }
+        footer p, footer a { 
+            color: #ccc; 
+            text-decoration: none; 
+            font-size: 20px; 
+            text-shadow: 0px 0px 2px rgba(255, 255, 255, 0.4);
+            transition: all 0.3s ease; /* Smooth transition added here */
+        }
+        footer a:hover { 
+            color: var(--primary-purple); 
+            text-decoration: underline; /* Underline added here */
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 id="order-title">Order #---</h2>
-    <div id="status-alert"></div>
+    <header>
+        <img src="images/weezler.svg" alt="Cheat Day Logo" class="logo-img">
+    </header>
 
-    <div class="status-bar">
-        <div class="status-step" id="step-pending"><div class="circle">1</div><p>Pending</p></div>
-        <div class="status-step" id="step-confirmed"><div class="circle">2</div><p>Confirmed</p></div>
-        <div class="status-step" id="step-prep"><div class="circle">3</div><p>In Prep</p></div>
-        <div class="status-step" id="step-ready"><div class="circle">4</div><p>Ready!</p></div>
+    <div class="main-content">
+        <div class="container">
+            <h2 id="order-title">Order #---</h2>
+
+            <div class="status-bar">
+                <div class="status-step" id="step-pending"><div class="circle">1</div><p>Pending</p></div>
+                <div class="status-step" id="step-confirmed"><div class="circle">2</div><p>Confirmed</p></div>
+                <div class="status-step" id="step-prep"><div class="circle">3</div><p>In Prep</p></div>
+                <div class="status-step" id="step-ready"><div class="circle">4</div><p>Ready!</p></div>
+            </div>
+
+            <div id="receipt">
+                <div class="receipt-header">
+                    <span>Customer: <strong id="cust-name" style="color: #2f3542;">---</strong></span>
+                    <span id="order-date"></span>
+                </div>
+                <div id="item-list"></div>
+                <div class="total-row">
+                    <span>Total</span>
+                    <span id="total-price">$0.00</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="receipt">
-        <div class="receipt-header">
-            <span>Customer: <strong id="cust-name" style="color: #2f3542;">---</strong></span>
-            <span id="order-date"></span>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3>Contact Us</h3>
+                <p>Phone: (210) 722-0119</p>
+            </div>
+
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <a href="https://www.instagram.com/cheatday.catering/" target="_blank">Instagram</a>
+            </div>
         </div>
-        <div id="item-list"></div>
-        <div class="total-row">
-            <span>Total</span>
-            <span id="total-price">$0.00</span>
-        </div>
-    </div>
-</div>
+    </footer>
 
 <script>
     const API_INVOKE_URL = "https://1p13n3k8d5.execute-api.us-east-1.amazonaws.com/test";
@@ -191,9 +244,7 @@
             const response = await fetch(`${API_INVOKE_URL}/customer/order/${orderID}`);
             const data = await response.json();
             if (response.status === 200) updateUI(data);
-        } catch (error) {
-            console.error("Connection Error:", error);
-        }
+        } catch (error) { console.error("API Error:", error); }
     }
 
     function updateUI(data) {
@@ -202,38 +253,17 @@
         document.getElementById('total-price').innerText = `$${data.total}`;
         document.getElementById('order-date').innerText = new Date(data.date).toLocaleDateString();
 
-        const alertBox = document.getElementById('status-alert');
-        if (data.status === "Canceled") {
-            alertBox.innerHTML = `<div class="alert-canceled">This order was Canceled</div>`;
-        } else {
-            alertBox.innerHTML = "";
-        }
-
         resetProgressBar();
         const status = data.status.toLowerCase();
 
-        // LOGIC: Set status classes AND update the gradient width
-        if (status === "pending") {
-            activateStep("step-pending");
-            updateLine(12.5); // Fill up to Circle 1
-        } 
-        else if (status === "confirmed") {
-            completeStep("step-pending");
-            activateStep("step-confirmed");
-            updateLine(37.5); // Fill halfway between 1 & 2
-        } 
+        // Standard status mapping
+        if (status === "pending") { activateStep("step-pending"); updateLine(12.5); } 
+        else if (status === "confirmed") { completeStep("step-pending"); activateStep("step-confirmed"); updateLine(37.5); } 
         else if (status === "in prep" || status === "preparing") {
-            completeStep("step-pending");
-            completeStep("step-confirmed");
-            activateStep("step-prep");
-            updateLine(62.5); // Fill halfway between 2 & 3
+            completeStep("step-pending"); completeStep("step-confirmed"); activateStep("step-prep"); updateLine(62.5);
         } 
         else if (status === "ready" || status === "completed") {
-            completeStep("step-pending");
-            completeStep("step-confirmed");
-            completeStep("step-prep");
-            activateStep("step-ready");
-            updateLine(100);  // Full Bar
+            completeStep("step-pending"); completeStep("step-confirmed"); completeStep("step-prep"); activateStep("step-ready"); updateLine(100);
         }
 
         const list = document.getElementById('item-list');
@@ -245,17 +275,8 @@
         `).join('');
     }
 
-    // Helper to update the CSS variable for the gradient line
-    function updateLine(percentage) {
-        document.documentElement.style.setProperty('--progress-width', percentage + '%');
-    }
-
-    function resetProgressBar() {
-        document.querySelectorAll('.status-step').forEach(step => {
-            step.classList.remove('active', 'completed');
-        });
-    }
-
+    function updateLine(pct) { document.documentElement.style.setProperty('--progress-width', pct + '%'); }
+    function resetProgressBar() { document.querySelectorAll('.status-step').forEach(s => s.classList.remove('active', 'completed')); }
     function activateStep(id) { document.getElementById(id).classList.add('active'); }
     function completeStep(id) { document.getElementById(id).classList.add('completed'); }
 
