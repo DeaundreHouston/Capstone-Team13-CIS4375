@@ -9,46 +9,48 @@
   <link rel="stylesheet" href="style.css" />
 
   <style>
-    /* --- Styles from previous version --- */
+    :root {
+      --primary-purple: #9575CD;
+      --theme-yellow: #FFFACD;
+      --text-dark: #2f3542;
+    }
+
     .cart-wrap{ max-width:1200px; margin:0 auto; padding:20px; text-align:left; }
     .cart-grid{ display:grid; grid-template-columns:1.05fr 0.95fr; gap:24px; align-items:start; }
     @media (max-width:900px){ .cart-grid{ grid-template-columns:1fr; } }
-    .panel{ background:#FFFACD; border:1px solid #ddd; border-radius:12px; padding:18px; box-shadow:0 4px 8px rgba(0,0,0,0.08); }
-    .panel h2{ margin:0 0 12px; color:#333; }
+    
+    .panel{ background: var(--theme-yellow); border:1px solid #ddd; border-radius:12px; padding:18px; box-shadow:0 4px 8px rgba(0,0,0,0.08); }
+    .panel h2{ margin:0 0 12px; color: var(--text-dark); }
+    
     .table{ width:100%; border-collapse:collapse; border-radius:10px; background:#fff; border:1px solid #eee; overflow:hidden; }
     .table th,.table td{ padding:10px; border-bottom:1px solid #eee; vertical-align:middle; font-size:14px; }
-    .table th{ background:rgba(179,157,219,0.18); font-weight:700; color:#333; text-align:left; }
+    .table th{ background:rgba(149, 117, 205, 0.1); font-weight:700; color:#333; text-align:left; }
+    
     .right{ text-align:right; } .center{ text-align:center; }
-    .qty-controls{ display:inline-flex; align-items:center; gap:8px; justify-content:center; }
-    .qty-btn{ width:28px; height:28px; border-radius:8px; border:1px solid #ddd; background:#fff; cursor:pointer; font-weight:700; color:#333; }
-    .qty-btn:hover{ border-color:#B39DDB; }
-    .remove-btn{ border:none; background:transparent; color:#9575CD; font-weight:700; cursor:pointer; text-decoration:underline; font-size:13px; padding:0; }
+    .remove-btn{ border:none; background:transparent; color: var(--primary-purple); font-weight:700; cursor:pointer; text-decoration:underline; font-size:13px; padding:0; }
+    
     .totals{ margin-top:14px; background:#fff; border:1px solid #eee; border-radius:10px; padding:12px; }
     .totals-row{ display:flex; justify-content:space-between; padding:6px 0; font-size:14px; color:#333; }
     .totals-row strong{ font-size:15px; }
-    .muted{ color:#666; font-size:13px; margin-top:8px; }
+
     .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
     .form-grid .full{ grid-column:1 / -1; }
     .field label{ display:block; font-size:13px; font-weight:700; color:#333; margin-bottom:6px; }
     .field input,.field select{ width:100%; padding:10px; border-radius:10px; border:1px solid #ddd; outline:none; font-size:14px; background:#fff; box-sizing: border-box; }
-    .field input:focus,.field select:focus{ border-color:#B39DDB; box-shadow:0 0 0 3px rgba(179,157,219,0.25); }
+    .field input:focus{ border-color: var(--primary-purple); box-shadow:0 0 0 3px rgba(149, 117, 205, 0.2); }
 
-    /* --- Stripe Elements Styling --- */
+    /* Stripe Elements */
     .stripe-input { background: #fff; padding: 11px 12px; border-radius: 10px; border: 1px solid #ddd; height: 40px; box-sizing: border-box; }
-    .stripe-input--focus { border-color: #B39DDB; box-shadow: 0 0 0 3px rgba(179,157,219,0.25); }
     #card-errors { color: #fa755a; font-size: 13px; margin-top: 8px; }
-    .pay-methods{ display:grid; gap:10px; margin-top:10px; }
-    .pay-option{ background:#fff; border:1px solid #eee; border-radius:12px; padding:10px 12px; }
-    .pay-option label{ display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:700; color:#333; font-size:14px; }
 
-    /* --- Visual Lock Overlay & Spinner --- */
+    /* Visual Lock Overlay */
     .overlay {
-      display: none; /* Hidden by default */
+      display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(4px);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(5px);
       z-index: 10000;
       justify-content: center;
       align-items: center;
@@ -57,28 +59,24 @@
     .spinner {
       width: 50px; height: 50px;
       border: 5px solid rgba(149, 117, 205, 0.2);
-      border-top: 5px solid #9575CD;
+      border-top: 5px solid var(--primary-purple);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
     .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
-    .btn{ padding:12px 14px; border:none; border-radius:12px; font-weight:800; cursor:pointer; text-shadow:0px 0px 2px rgba(255,255,255,0.35); transition:background 0.2s ease, transform 0.15s ease; }
-    .btn-primary{ background:#333; color:#fff; flex:1; min-width:220px; }
-    .btn-primary:hover{ background:#9575CD; transform:translateY(-1px); }
+    .btn{ padding:12px 14px; border:none; border-radius:12px; font-weight:800; cursor:pointer; transition: all 0.2s ease; }
+    .btn-primary{ background: var(--text-dark); color:#fff; flex:1; min-width:220px; }
+    .btn-primary:hover{ background: var(--primary-purple); transform:translateY(-2px); }
     .btn-secondary{ background:#fff; color:#333; border:1px solid #ddd; flex:1; min-width:180px; }
-    .btn-secondary:hover{ border-color:#B39DDB; transform:translateY(-1px); }
-    .btn:disabled{ opacity:0.6; cursor:not-allowed; transform:none; }
-    .toast{ position:fixed; right:16px; bottom:16px; background:#333; color:#fff; padding:10px 14px; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,0.25); opacity:0; transform:translateY(10px); transition:opacity 0.2s ease, transform 0.2s ease; pointer-events:none; font-size:0.95rem; z-index:9999; border:1px solid rgba(179,157,219,0.7); }
-    .toast.show{ opacity:1; transform:translateY(0); }
   </style>
 </head>
 
 <body>
   <div id="loadingOverlay" class="overlay">
     <div class="spinner"></div>
-    <p style="margin-top: 15px; font-weight: 800; color: #333;">Processing Order...</p>
+    <p style="margin-top: 15px; font-weight: 800; color: #2f3542; font-size: 1.2rem;">Finishing your Cheat Day order...</p>
   </div>
 
   <header>
@@ -88,9 +86,7 @@
     <nav>
       <a href="index.html">Home</a>
       <a href="menu.html">Menu</a>
-      <a href="cart.html" class="cart-link active">
-        Cart <span id="cartCount" class="cart-badge">0</span>
-      </a>
+      <a href="cart.html" class="cart-link active">Cart <span id="cartCount" class="cart-badge">0</span></a>
       <a href="staff_login.html">Staff Login</a>
     </nav>
   </header>
@@ -102,8 +98,8 @@
 
         <section class="panel">
           <h2>Items</h2>
-          <div id="emptyState" class="empty-state" style="display:none; text-align:center; padding:20px;">
-            Your cart is empty.<br><a href="menu.html" style="color:#9575CD; font-weight:700;">Go to Menu</a>
+          <div id="emptyState" style="display:none; text-align:center; padding:20px;">
+            Your cart is empty.<br><a href="menu.html" style="color:var(--primary-purple); font-weight:700;">Go to Menu</a>
           </div>
           <div id="cartSection">
             <table class="table">
@@ -119,7 +115,7 @@
             </div>
             <div class="btn-row">
               <button id="continueBtn" class="btn btn-primary">Place Order</button>
-              <button id="clearBtn" class="btn btn-secondary">Clear Cart</button>
+              <button id="clearBtn" class="btn btn-secondary" onclick="clearCart()">Clear Cart</button>
             </div>
           </div>
         </section>
@@ -128,49 +124,37 @@
           <h2>Billing Information</h2>
           <form id="rightForm">
             <div class="form-grid">
-              <div class="field full"><label>Full Name</label><input id="fullName" name="fullName" required /></div>
-              <div class="field"><label>Email</label><input id="email" name="email" type="email" required /></div>
-              <div class="field"><label>Phone</label><input id="phone" name="phone" required /></div>
-              <div class="field full"><label>Address</label><input id="address1" name="address1" required /></div>
-              <div class="field full"><label>Apt/Suite</label><input id="address2" name="address2" /></div>
-              <div class="field"><label>City</label><input id="city" name="city" required /></div>
-              <div class="field"><label>State</label><input id="state" name="state" required /></div>
-              <div class="field"><label>ZIP</label><input id="zip" name="zip" required /></div>
-              <div class="field">
-                <label>Country</label>
-                <select id="country" name="country"><option value="US">United States</option></select>
-              </div>
+              <div class="field full"><label>Full Name</label><input id="fullName" required /></div>
+              <div class="field"><label>Email</label><input id="email" type="email" required /></div>
+              <div class="field"><label>Phone</label><input id="phone" required /></div>
+              <div class="field full"><label>Address</label><input id="address1" required /></div>
+              <div class="field"><label>City</label><input id="city" required /></div>
+              <div class="field"><label>State</label><input id="state" required /></div>
+              <div class="field"><label>ZIP</label><input id="zip" required /></div>
             </div>
 
             <h2 style="margin-top:16px;">Payment Method</h2>
-            <div class="pay-methods">
-              <div class="pay-option">
-                <label><input type="radio" checked /> Credit / Debit (Stripe Test)</label>
-                <div class="form-grid" style="margin-top:10px;">
-                  <div class="field full"><label>Card Number</label><div id="card-number" class="stripe-input"></div></div>
-                  <div class="field"><label>Expiration</label><div id="card-expiry" class="stripe-input"></div></div>
-                  <div class="field"><label>CVC</label><div id="card-cvc" class="stripe-input"></div></div>
-                </div>
-                <div id="card-errors" role="alert"></div>
-              </div>
+            <div class="field full"><label>Card Information</label><div id="card-number" class="stripe-input"></div></div>
+            <div class="form-grid" style="margin-top:10px;">
+              <div class="field"><label>Expiration</label><div id="card-expiry" class="stripe-input"></div></div>
+              <div class="field"><label>CVC</label><div id="card-cvc" class="stripe-input"></div></div>
             </div>
+            <div id="card-errors" role="alert"></div>
           </form>
         </section>
       </div>
     </div>
   </main>
 
-  <div id="toast" class="toast">Saved!</div>
-
   <script>
     const API_BASE_URL = "https://1p13n3k8d5.execute-api.us-east-1.amazonaws.com/test";
     const CART_KEY = "cheatday_cart";
     const TAX_RATE = 0.0825;
 
-    // --- STRIPE INIT ---
+    // Stripe Init
     const stripe = Stripe('pk_test_51TKOz1DpbBC1Nt9y30b0haRFxHxiTTDFoQYVKOVZmBYEKWlhcNt9BDX9cGhcP1s2kl01pDQSJ3LRYdeOtwGkgoan002clhA2l0');
     const elements = stripe.elements();
-    const style = { base: { fontSize: '14px', color: '#333', fontFamily: 'inherit' } };
+    const style = { base: { fontSize: '14px', color: '#333' } };
 
     const cardNumber = elements.create('cardNumber', { style });
     const cardExpiry = elements.create('cardExpiry', { style });
@@ -180,11 +164,12 @@
     cardExpiry.mount('#card-expiry');
     cardCvc.mount('#card-cvc');
 
-    // --- CORE LOGIC ---
+    // Cart Core Functions
     function getCart(){ return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
     function setCart(cart){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); updateCartCount(); }
     function updateCartCount(){ document.getElementById("cartCount").textContent = getCart().reduce((s,l)=>s+l.qty,0); }
     function money(n){ return Number(n||0).toLocaleString(undefined,{style:"currency",currency:"USD"}); }
+    function clearCart(){ setCart([]); renderCart(); }
 
     function renderCart(){
       const cart = getCart();
@@ -195,13 +180,7 @@
         return;
       }
       body.innerHTML = cart.map(item => `
-        <tr>
-          <td>${item.name}</td>
-          <td class="right">${money(item.price)}</td>
-          <td class="center"><strong>${item.qty}</strong></td>
-          <td class="right">${money(item.price * item.qty)}</td>
-          <td class="right"><button onclick="removeItem('${item.id}')" class="remove-btn">Remove</button></td>
-        </tr>
+        <tr><td>${item.name}</td><td class="right">${money(item.price)}</td><td class="center"><strong>${item.qty}</strong></td><td class="right">${money(item.price * item.qty)}</td><td class="right"><button onclick="removeItem('${item.id}')" class="remove-btn">Remove</button></td></tr>
       `).join("");
       
       const sub = cart.reduce((s,x)=>s+(x.price*x.qty),0);
@@ -215,7 +194,7 @@
       renderCart();
     }
 
-    // --- THE SECURE HANDSHAKE ---
+    // THE REDIRECT LOGIC
     document.getElementById("continueBtn").addEventListener("click", async () => {
       const cart = getCart();
       const form = document.getElementById("rightForm");
@@ -223,10 +202,9 @@
 
       if (!form.checkValidity() || !cart.length) { form.reportValidity(); return; }
 
-      // 1. Show Visual Lock
-      overlay.style.display = 'flex';
+      overlay.style.display = 'flex'; // Lock the screen
 
-      // 2. Stripe Handshake
+      // 1. Stripe PaymentMethod
       const {paymentMethod, error} = await stripe.createPaymentMethod({
         type: 'card',
         card: cardNumber,
@@ -239,21 +217,20 @@
         return;
       }
 
-      // 3. Construct Secure Payload (No prices sent!)
-      const b = Object.fromEntries(new FormData(form));
+      // 2. Build Payload
       const payload = {
         paymentMethodId: paymentMethod.id,
         customer: {
-          first_name: b.fullName.split(' ')[0],
-          last_name: b.fullName.split(' ').slice(1).join(' '),
-          email: b.email,
-          phone: b.phone,
-          address: `${b.address1}, ${b.city}, ${b.state} ${b.zip}`
+          first_name: document.getElementById('fullName').value.split(' ')[0],
+          last_name: document.getElementById('fullName').value.split(' ').slice(1).join(' '),
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          address: `${document.getElementById('address1').value}, ${document.getElementById('city').value}, ${document.getElementById('state').value}`
         },
         items: cart.map(i => ({ product_id: i.id, qty: i.qty }))
       };
 
-      // 4. Send to AWS Lambda
+      // 3. Send to AWS
       try {
         const res = await fetch(`${API_BASE_URL}/orders`, {
           method: "POST",
@@ -261,18 +238,20 @@
           body: JSON.stringify(payload)
         });
 
+        const result = await res.json();
+
         if (res.ok) {
-          const result = await res.json();
-          setCart([]);
-          alert(`Order #${result.orderId} Successful!`);
-          window.location.href = "index.html";
+          // SUCCESS!
+          setCart([]); // Wipe local cart
+          
+          // THE MAGIC HAND-OFF: Redirecting to the order-status page with the new ID
+          window.location.href = `order-status.html?orderID=${result.orderID}`;
         } else {
-          const err = await res.json();
-          alert("Error: " + (err.error || "Order failed"));
+          alert("Order failed: " + (result.error || "Check your card details"));
+          overlay.style.display = 'none';
         }
       } catch (e) {
-        alert("Network Error connecting to server.");
-      } finally {
+        alert("Server connection error.");
         overlay.style.display = 'none';
       }
     });
