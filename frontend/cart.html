@@ -126,7 +126,7 @@
             <div class="form-grid">
               <div class="field full"><label>Full Name</label><input id="fullName" required /></div>
               <div class="field"><label>Email</label><input id="email" type="email" required /></div>
-              <div class="field"><label>Phone</label><input id="phone" required /></div>
+              <div class="field"><label>Phone</label><input id="phone" type="tel" maxlength="12" required /></div>
               <div class="field full"><label>Address</label><input id="address1" required /></div>
               <div class="field"><label>City</label><input id="city" required /></div>
               <div class="field"><label>State</label><input id="state" required /></div>
@@ -256,8 +256,19 @@
       }
     });
 
+    // --- PHONE NUMBER INPUT MASK ---
+const phoneInput = document.getElementById('phone');
+
+phoneInput.addEventListener('input', (e) => {
+    // 1. Remove all non-digits and capture groups for XXX-XXX-XXXX
+    let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+    
+    // 2. Re-assemble the string with hyphens as they type
+    e.target.value = !x[2] ? x[1] : x[1] + '-' + x[2] + (x[3] ? '-' + x[3] : '');
+});
     renderCart();
     updateCartCount();
+
   </script>
 </body>
 </html>
