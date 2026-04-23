@@ -185,7 +185,11 @@
     <option value="WY">WY</option>
   </select>
 </div>
-              <div class="field"><label>ZIP</label><input id="zip" maxlength="5" required /></div>
+              <div class="field"><label>ZIP</label><div class="field">
+  
+  <input id="zip" type="text" inputmode="numeric" pattern="\d{5}" maxlength="5" 
+         oninput="this.value = this.value.replace(/[^0-9]/g, '');" required />
+</div></div>
             </div>
 
             <h2 style="margin-top:16px;">Payment Method</h2>
