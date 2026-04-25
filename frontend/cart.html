@@ -124,7 +124,8 @@
           <h2>Billing Information</h2>
           <form id="rightForm">
             <div class="form-grid">
-              <div class="field full"><label>Full Name</label><input id="fullName" required /></div>
+              <div class="field full"><label>First Name</label><input id="firstName" required /></div>
+              <div class="field full"><label>Last Name</label><input id="lastName" required /></div>
               <div class="field"><label>Email</label><input id="email" type="email" required /></div>
               <div class="field"><label>Phone</label><input id="phone" type="tel" maxlength="12" required /></div>
               <div class="field full"><label>Address</label><input id="address1" required /></div>
@@ -267,7 +268,8 @@
       const {paymentMethod, error} = await stripe.createPaymentMethod({
         type: 'card',
         card: cardNumber,
-        billing_details: { name: document.getElementById('fullName').value }
+        billing_details: { name: `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}` 
+  }
       });
 
       if (error) {
@@ -280,8 +282,8 @@
       const payload = {
         paymentMethodId: paymentMethod.id,
         customer: {
-          first_name: document.getElementById('fullName').value.split(' ')[0],
-          last_name: document.getElementById('fullName').value.split(' ').slice(1).join(' '),
+          first_name: document.getElementById('firstName').value,
+          last_name: document.getElementById('lastName').value,
           email: document.getElementById('email').value,
           phone: document.getElementById('phone').value,
           address: `${document.getElementById('address1').value}, ${document.getElementById('city').value}, ${document.getElementById('state').value}`
